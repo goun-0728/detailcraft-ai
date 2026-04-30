@@ -11,28 +11,40 @@ export default async function handler(req) {
   }
   try {
     const body = await req.json();
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API key not configured' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: body.model || 'claude-sonnet-4-20250514',
+        model: 'gpt-4o',
         max_tokens: body.max_tokens || 6000,
-        system: body.system || '',
-        messages: body.messages || [],
+        messages: [
+          { role: 'system', content: body.system || '' },
+          ...(body.messages || [])
+        ],
       }),
     });
+
     const data = await response.json();
-    return new Response(JSON.stringify(data), {
+
+    // OpenAI 응답을 Anthropic 형식으로 변환
+    const converted = {
+      content: [{
+        type: 'text',
+        text: data.choices?.[0]?.message?.content || ''
+      }]
+    };
+
+    return new Response(JSON.stringify(converted), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (err) {
