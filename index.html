@@ -553,29 +553,76 @@ async function generate(){
 
   const sys=`당신은 네이버 스마트스토어 상세페이지 전문 기획 AI입니다. 반드시 순수 JSON만 반환하세요. 규칙: 1)마크다운 코드블록 금지 2)JSON 문자열 안 큰따옴표 금지-작은따옴표로 대체 3)줄바꿈 금지-한 줄로 작성 4)모든 필드 한 줄 문자열로만`;
 
-  const usr=`네이버 상세페이지 기획 요청:
-카테고리: ${cat} | 제품명: ${name} | 특징: ${feat}
-타깃: ${tgt||'일반 소비자'} | 가격: ${prc||'미정'} | 강조: ${ext||'없음'}
-필수기재: ${reqLines||'없음'} | 색감: ${colorMap[selColor]} | 테마: ${themeMap[selTheme]}
-${photoAnalysis?`제품사진분석: ${photoAnalysis}`:''}
+  const usr=`당신은 네이버 스마트스토어 상세페이지 전문 기획 컨설턴트입니다. 아래 제품을 분석하고 실제 시장 경쟁 환경과 소비자 구매 심리를 반영한 완성도 높은 상세페이지를 기획해주세요.
 
-아래 JSON으로만 응답:
-{"themeName":"${themeMap[selTheme]}","themeKey":"${selTheme}","colorScheme":"구체적 색상 설명","accentHex":"#X","bgHex":"#X","bgSecHex":"#X","textHex":"#X","textMutedHex":"#X","surfaceHex":"#X",
+[제품 정보]
+카테고리: ${cat} | 제품명: ${name} | 핵심특징: ${feat}
+타깃: ${tgt||'일반 소비자'} | 가격: ${prc||'미정'} | 추가강조: ${ext||'없음'}
+필수기재사항: ${reqLines||'없음'} | 색감: ${colorMap[selColor]} | 테마: ${themeMap[selTheme]}
+${photoAnalysis?`제품사진AI분석: ${photoAnalysis}`:''}
+
+[시장 분석 지침]
+이 카테고리(${cat})에서 네이버 스마트스토어에 일반적으로 많이 판매되는 동종 제품들의 공통 특징, 소비자들이 자주 언급하는 불만/니즈, 경쟁 제품 대비 차별화 포인트를 실제 시장 지식을 바탕으로 반영하세요. 2025년 네이버 쇼핑 트렌드(AiTEMS 알고리즘, 동영상 리뷰 가중치, 초기 고객 반응 중요성)도 반영하세요.
+
+아래 JSON으로만 응답 (마크다운 코드블록 금지, 큰따옴표 금지→작은따옴표로, 줄바꿈 금지, 한 줄 문자열):
+
+{"themeName":"${themeMap[selTheme]}","themeKey":"${selTheme}","colorScheme":"구체적 색상 설명","accentHex":"#XXXXXX","bgHex":"#XXXXXX","bgSecHex":"#XXXXXX","textHex":"#XXXXXX","textMutedHex":"#XXXXXX","surfaceHex":"#XXXXXX",
+
+"report":{
+  "marketAnalysis":"이 카테고리 시장 상황 분석. 경쟁 제품들의 일반적인 특징, 소비자 불만 패턴, 시장 트렌드를 150자 이상 구체적으로 서술. 따옴표 줄바꿈 금지",
+  "targetAnalysis":"타깃 소비자 심층 분석. 구매 동기, 핵심 니즈, 구매 결정 요인, 가장 많이 보는 키워드, 이탈 원인을 150자 이상 서술. 따옴표 줄바꿈 금지",
+  "competitiveEdge":"경쟁 우위 분석. 동종 제품 대비 이 제품만의 차별점, 가격 포지셔닝, 강조해야 할 USP를 100자 이상 서술. 따옴표 줄바꿈 금지",
+  "planningReason":"이 상세페이지 구성을 선택한 전략적 이유. 각 섹션이 왜 이 순서여야 하는지, 소비자 심리 흐름과 연결하여 150자 이상 서술. 따옴표 줄바꿈 금지",
+  "seoKeywords":"네이버 쇼핑 검색에서 이 제품이 노출될 수 있는 핵심 키워드 5~8개를 쉼표로 구분하여 나열",
+  "designStrategy":"디자인 전략. 색감 선택 이유, 폰트 방향, 이미지 톤, 레이아웃 핵심 원칙을 100자 이상 서술. 따옴표 줄바꿈 금지",
+  "contentStrategy":"콘텐츠 전략. 어떤 감정을 건드릴지, 어떤 언어 톤을 써야 할지, 무엇을 강조하고 무엇을 숨길지 100자 이상 서술. 따옴표 줄바꿈 금지",
+  "caution":"기획 시 주의사항. 이 카테고리에서 흔히 하는 실수, 소비자 이탈 원인, 피해야 할 표현이나 구성. 100자 이상 서술. 따옴표 줄바꿈 금지"
+},
+
 "sections":[
-{"order":1,"name":"공감 후킹","purpose":"뒤로가기 방지","slides":[{"headline":"소비자 감정을 직격하는 강렬한 제목 15자 이내 서술형 금지","subtext":"1. 첫 공감포인트 구체적으로 2. 두 번째 공감포인트 구체적으로 3. 해결 암시 문구. 각 20자 이내","layout":"full-image-overlay","tags":["태그1","태그2"],"imagePromptKo":"[공감 후킹 섹션용] 제품의 타깃 고객이 느끼는 감성적인 장면 연출. 카메라 위치와 각도(예: 45도 사선), 조명 방향과 종류(예: 창문 자연광 왼쪽), 배경 소재와 색상, 제품 또는 라이프스타일 배치, 전체 색감 톤과 분위기 상세 설명. 100자 이상."}]},
-{"order":2,"name":"문제 심화","purpose":"필요성 각인","slides":[{"headline":"문제 본질 꿰뚫는 강렬한 제목 15자 이내","subtext":"1. 이 문제를 방치하면 생기는 구체적 결과 2. 감정적 타격 묘사 3. 변화 필요성 암시. 각 20자 이내","layout":"center-text","tags":["태그1","태그2"],"imagePromptKo":"[문제 심화 섹션용] 제품 없이 소비자의 불편함이나 고민 상황 연출. 어둡거나 무거운 색감 톤 사용. 카메라 각도와 위치, 조명 방향, 배경, 인물 표정이나 상황 묘사, 무겁고 공감 가는 분위기. 100자 이상."}]},
-{"order":3,"name":"해결책 제시","purpose":"제품 연결","slides":[{"headline":"제품이 해결책임 선언하는 강렬한 제목 15자 이내","subtext":"1. 핵심 해결 메커니즘 2. 경쟁제품과 차별점 3. 사용 후 명확한 변화. 각 20자 이내","layout":"split-right-image","tags":["태그1","태그2"],"imagePromptKo":"[해결책 제시 섹션용] 제품을 주인공으로 드라마틱하게 부각하는 장면. 밝고 희망적인 색감 톤. 제품이 가장 아름답게 보이는 조명과 각도, 배경 선택, 전문 광고 사진 스타일. 100자 이상."}]},
-{"order":4,"name":"핵심 특징","purpose":"강점 강조","slides":[{"headline":"첫 번째 핵심 특징 강렬한 제목 15자 이내","subtext":"1. 이 특징의 기능 원리 2. 실제 사용 효과 3. 경쟁 대비 우위. 각 20자 이내","layout":"split-left-text","tags":["태그"],"imagePromptKo":"[핵심 특징1 섹션용] 제품의 첫 번째 특징이나 소재를 극단적으로 클로즈업. 매크로 렌즈 효과로 질감과 디테일 강조. 조명 방향, 피사계심도, 배경 색상과 소재, 색감 톤 상세 설명. 100자 이상."},{"headline":"두 번째 핵심 특징 강렬한 제목 15자 이내","subtext":"1. 두 번째 특징 기능 원리 2. 실생활 적용 방법 3. 사용자 체감 혜택. 각 20자 이내","layout":"split-right-image","tags":["태그"],"imagePromptKo":"[핵심 특징2 섹션용] 제품 실제 사용 라이프스타일 장면. 자연스러운 일상 환경에서 제품 사용 모습. 카메라 각도, 자연광 또는 인공조명, 배경, 따뜻한 색감 톤. 100자 이상."}]},
-{"order":5,"name":"신뢰/증거","purpose":"구매 확신","slides":[{"headline":"신뢰 폭발시키는 수치 중심 제목 15자 이내","subtext":"1. 핵심 수치나 인증 근거 2. 전문가 또는 고객 검증 내용 3. 품질 보증 구체적 내용. 각 20자 이내","layout":"grid-3col","tags":["태그1","태그2"],"imagePromptKo":"[신뢰 증거 섹션용] 제품과 인증서 패키지 등을 함께 배치한 플랫레이. 오버헤드 앵글에서 위에서 아래로 촬영. 고급스러운 배경 소재, 균형 잡힌 배치, 밝고 신뢰감 있는 색감. 100자 이상."}]},
-{"order":6,"name":"구매 유도 CTA","purpose":"전환 극대화","slides":[{"headline":"지금 바로 행동하게 만드는 강렬한 마감 제목 15자 이내","subtext":"1. 지금 구매 시 혜택 2. 망설임 해소 문구 3. 강력한 행동 촉구. 각 20자 이내","layout":"full-image-overlay","tags":["태그1","태그2"],"imagePromptKo":"[CTA 섹션용] 제품의 가장 완성도 높은 뷰티샷. 프리미엄 광고 스타일로 가장 매력적인 각도. 드라마틱한 조명, 고급스러운 배경, 구매욕을 강하게 자극하는 색감과 분위기. 100자 이상."}]}
+{"order":1,"name":"공감 후킹","purpose":"뒤로가기 방지","slides":[{
+  "headline":"소비자 감정을 직격하는 강렬한 제목 15자 이내 서술형 금지",
+  "subtext":"이 카테고리 소비자들이 실제로 겪는 구체적 불편함 묘사. 형식은 상황에 맞게 자유롭게(서술/불릿/감탄사 등). 공감 극대화. 80자 이상. 따옴표 줄바꿈 금지",
+  "layout":"full-image-overlay","tags":["감성태그1","감성태그2"],
+  "imagePromptKo":"[공감 후킹] 타깃 소비자가 느끼는 감성적 장면 연출. 카메라 각도(예:45도 사선), 조명(예:창문 자연광 왼쪽 45도), 배경 소재와 색상, 제품 또는 라이프스타일 배치, 색감 톤과 분위기 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
+
+{"order":2,"name":"문제 심화","purpose":"필요성 각인","slides":[{
+  "headline":"문제 본질 꿰뚫는 강렬한 제목 15자 이내",
+  "subtext":"이 문제를 방치하면 어떤 일이 생기는지, 동종 제품을 쓰면 어떤 실망을 하는지 구체적 서술. 형식 자유(서술형/비교형/질문형). 시장에서 흔히 보이는 소비자 불만 반영. 80자 이상. 따옴표 줄바꿈 금지",
+  "layout":"center-text","tags":["문제태그1","문제태그2"],
+  "imagePromptKo":"[문제 심화] 제품 없이 소비자 불편함 상황 연출. 어둡거나 무거운 색감 톤. 카메라 각도, 조명, 배경, 표정이나 상황, 분위기 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
+
+{"order":3,"name":"해결책 제시","purpose":"제품 연결","slides":[{
+  "headline":"제품이 해결책임 선언하는 강렬한 제목 15자 이내",
+  "subtext":"이 제품이 왜 답인지. 핵심 해결 메커니즘, 동종 제품과의 실질적 차이, 사용 후 변화를 구체적으로. 형식 자유(서술/대조표/전후비교). 시장 평균 대비 우위 포함. 80자 이상. 따옴표 줄바꿈 금지",
+  "layout":"split-right-image","tags":["해결태그1","해결태그2"],
+  "imagePromptKo":"[해결책 제시] 제품을 주인공으로 드라마틱하게 부각. 밝고 희망적 색감 톤. 가장 아름답게 보이는 조명과 각도, 배경, 광고 사진 스타일 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
+
+{"order":4,"name":"핵심 특징","purpose":"강점 강조","slides":[
+{"headline":"첫 번째 핵심 특징 강렬한 제목 15자 이내","subtext":"이 특징의 기술적 원리, 실제 체감 효과, 동종 제품과의 차이를 구체 수치나 사례로. 형식 자유. 80자 이상. 따옴표 줄바꿈 금지","layout":"split-left-text","tags":["특징태그"],"imagePromptKo":"[핵심 특징1] 제품 첫 번째 특징이나 소재 극단적 클로즈업. 매크로 효과로 질감과 디테일 강조. 조명, 피사계심도, 배경, 색감 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"},
+{"headline":"두 번째 핵심 특징 강렬한 제목 15자 이내","subtext":"두 번째 특징의 기능, 실생활 적용, 사용자 혜택을 감성적+논리적으로. 형식 자유. 80자 이상. 따옴표 줄바꿈 금지","layout":"split-right-image","tags":["특징태그"],"imagePromptKo":"[핵심 특징2] 실제 사용 라이프스타일 장면. 자연스러운 일상 환경. 카메라 각도, 조명, 배경, 따뜻한 색감 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
+
+{"order":5,"name":"신뢰/증거","purpose":"구매 확신","slides":[{
+  "headline":"신뢰 폭발시키는 수치 중심 제목 15자 이내",
+  "subtext":"이 카테고리에서 소비자가 신뢰할 수 있는 구체적 근거들. 인증, 수치, 사용자 검증, 품질 보증을 형식 자유롭게(표/리스트/서술). 필수기재사항 내용 자연스럽게 포함. 80자 이상. 따옴표 줄바꿈 금지",
+  "layout":"grid-3col","tags":["신뢰태그1","신뢰태그2"],
+  "imagePromptKo":"[신뢰 증거] 제품과 인증서 패키지 플랫레이. 오버헤드 앵글. 고급 배경, 균형 잡힌 배치, 신뢰감 있는 밝은 색감 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
+
+{"order":6,"name":"구매 유도 CTA","purpose":"전환 극대화","slides":[{
+  "headline":"지금 행동하게 만드는 강렬한 마감 제목 15자 이내",
+  "subtext":"구매를 지금 해야 하는 이유. 혜택, 망설임 해소, 행동 촉구. 이 카테고리에서 구매 결정을 막는 마지막 장벽 제거. 형식 자유. 80자 이상. 따옴표 줄바꿈 금지",
+  "layout":"full-image-overlay","tags":["구매태그1","구매태그2"],
+  "imagePromptKo":"[CTA] 제품 가장 완성도 높은 뷰티샷. 프리미엄 광고 스타일. 드라마틱한 조명, 고급 배경, 구매욕 자극하는 색감과 분위기 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]}
 ],
-"trustNumbers":[{"num":"구체적 숫자+단위","label":"누적 판매량 등"},{"num":"구체적 숫자","label":"평점 또는 리뷰 수"},{"num":"구체적 숫자+단위","label":"만족도 또는 인증"}],
-"reviews":[{"stars":5,"text":"사용 전후 변화 중심 자연스러운 후기 한 문장 따옴표 없이","author":"닉네임"},{"stars":5,"text":"다른 각도 자연스러운 후기 한 문장 따옴표 없이","author":"닉네임"},{"stars":4,"text":"솔직한 후기 한 문장 따옴표 없이","author":"닉네임"}],
+
+"trustNumbers":[{"num":"구체적 숫자+단위","label":"설명"},{"num":"구체적 숫자","label":"설명"},{"num":"구체적 숫자+단위","label":"설명"}],
+"reviews":[{"stars":5,"text":"사용 전후 변화 중심 자연스러운 후기. 이 카테고리 소비자가 실제 쓸 법한 표현으로. 따옴표 없이 한 문장","author":"닉네임"},{"stars":5,"text":"다른 관점 자연스러운 후기. 따옴표 없이","author":"닉네임"},{"stars":4,"text":"솔직한 후기. 따옴표 없이","author":"닉네임"}],
 "specTable":[{"key":"항목","val":"내용"}],
 "heroHeadline":"전체를 관통하는 강렬한 메인 헤드라인 20자 이내",
-"heroSub":"메인 헤드라인 보완 서브 카피 30자 이내"}
+"heroSub":"보완하는 서브 카피 30자 이내"}
 
-규칙: headline 서술형 금지. subtext 반드시 1.2.3. 번호 형식. imagePromptKo 반드시 한국어 100자 이상 상세하게. 모든 문자열 따옴표 줄바꿈 없이 한 줄로.`;
+중요 규칙: subtext는 1.2.3. 고정 형식 금지 - 내용에 따라 서술형/비교형/감탄형/질문형/리스트 등 가장 적합한 형식 자유롭게 선택. report 각 필드는 반드시 지정 글자수 이상 구체적으로. 시장 지식을 최대한 반영해 실제로 도움이 되는 내용으로.`;
+
 
   try{
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o',max_tokens:6000,system:sys,messages:[{role:'user',content:usr}]})});
@@ -671,22 +718,66 @@ function renderResult(r,name,feat,prc){
     <div class="report" style="animation:up .3s ease both;">
       <div class="report-head">
         <div class="cnum" style="background:#4f46e5;font-size:14px;">📄</div>
-        <div><div style="font-size:13px;font-weight:800;color:#1c2240;">기획 보고서</div><div style="font-size:11px;color:#7880a0;">${date} · ${r.themeName} 테마</div></div>
-        <button onclick="copyEl('reportTxt',this)" class="copy-btn" style="margin-left:auto;">📋 복사</button>
+        <div><div style="font-size:13px;font-weight:800;color:#1c2240;">상세페이지 기획 보고서</div><div style="font-size:11px;color:#7880a0;">${date} 작성 · ${r.themeName} 테마 · DetailCraft AI</div></div>
+        <button onclick="copyEl('reportTxt',this)" class="copy-btn" style="margin-left:auto;">📋 전체 복사</button>
       </div>
       <div class="report-body" id="reportTxt">
-        <strong>📌 제품명:</strong> ${name} &nbsp;|&nbsp; <strong>💰 가격:</strong> ${prc||'미정'}<br>
-        <strong>🎨 테마:</strong> ${r.themeName} · ${r.colorScheme}<br>
-        <strong>🎯 기획 방향:</strong> ${themeDesc[r.themeKey]||''}<br><br>
-        <strong>🔑 핵심 특징</strong><br>${feats.map((f,i)=>`${i+1}. ${f}`).join('<br>')}<br><br>
-        <strong>📋 이 구성을 선택한 이유</strong><br>
-        1. <b>공감 후킹</b>으로 시작 → 소비자가 뒤로가기를 누르지 않도록 첫 화면에서 즉각 공감 유도<br>
-        2. <b>문제 심화</b> → 불편함을 구체화해 제품 필요성을 강하게 각인<br>
-        3. <b>해결책 제시</b> → 이 제품이 정확히 그 문제를 해결함을 증명<br>
-        4. <b>핵심 특징</b> → 경쟁 제품과 차별화되는 강점을 임팩트있게 강조<br>
-        5. <b>신뢰/증거</b> → 수치와 후기로 구매 결정을 확신으로 전환<br>
-        6. <b>CTA</b> → 지금 바로 구매하게 만드는 최종 전환 포인트<br><br>
-        <strong>🎨 디자인 총평</strong><br>${r.colorScheme} 색감 기반, ${r.themeName} 분위기로 모바일 최적화 레이아웃 구성. 스크롤에 따라 자연스럽게 구매 의도가 높아지도록 설계.
+
+        <!-- 기본 정보 -->
+        <div style="background:#f8f9ff;border-radius:9px;padding:14px 16px;margin-bottom:16px;border-left:3px solid #4f46e5;">
+          <div style="font-size:12px;font-weight:800;color:#4f46e5;margin-bottom:8px;">📌 기본 정보</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div><span style="color:#7880a0;font-size:11px;">제품명</span><br><b style="font-size:13px;">${name}</b></div>
+            <div><span style="color:#7880a0;font-size:11px;">가격</span><br><b style="font-size:13px;">${prc||'미정'}</b></div>
+            <div><span style="color:#7880a0;font-size:11px;">테마</span><br><span style="font-size:12px;">${r.themeName}</span></div>
+            <div><span style="color:#7880a0;font-size:11px;">색감</span><br><span style="font-size:12px;">${r.colorScheme}</span></div>
+          </div>
+          <div style="margin-top:8px;"><span style="color:#7880a0;font-size:11px;">핵심 특징</span><br><span style="font-size:12px;">${feats.map((f,i)=>`<span style='background:#eef0ff;border-radius:50px;padding:2px 9px;margin-right:5px;font-size:11px;color:#4f46e5;'>${f}</span>`).join('')}</span></div>
+          ${r.report?.seoKeywords?`<div style="margin-top:8px;"><span style="color:#7880a0;font-size:11px;">SEO 키워드</span><br><span style="font-size:12px;color:#374151;">${r.report.seoKeywords}</span></div>`:''}
+        </div>
+
+        <!-- 시장 분석 -->
+        ${r.report?.marketAnalysis?`<div style="margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:800;color:#1c2240;margin-bottom:6px;display:flex;align-items:center;gap:6px;"><span style="background:#fee2e2;border-radius:50px;padding:2px 9px;font-size:11px;color:#dc2626;">📊 시장 분석</span></div>
+          <div style="font-size:12px;color:#374151;line-height:1.85;background:#fff;border:1px solid #f0f4ff;border-radius:8px;padding:12px 14px;">${r.report.marketAnalysis}</div>
+        </div>`:''}
+
+        <!-- 타깃 분석 -->
+        ${r.report?.targetAnalysis?`<div style="margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:800;color:#1c2240;margin-bottom:6px;"><span style="background:#fef3c7;border-radius:50px;padding:2px 9px;font-size:11px;color:#d97706;">🎯 타깃 소비자 분석</span></div>
+          <div style="font-size:12px;color:#374151;line-height:1.85;background:#fff;border:1px solid #f0f4ff;border-radius:8px;padding:12px 14px;">${r.report.targetAnalysis}</div>
+        </div>`:''}
+
+        <!-- 경쟁 우위 -->
+        ${r.report?.competitiveEdge?`<div style="margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:800;color:#1c2240;margin-bottom:6px;"><span style="background:#d1fae5;border-radius:50px;padding:2px 9px;font-size:11px;color:#065f46;">⚡ 경쟁 우위 분석</span></div>
+          <div style="font-size:12px;color:#374151;line-height:1.85;background:#fff;border:1px solid #f0f4ff;border-radius:8px;padding:12px 14px;">${r.report.competitiveEdge}</div>
+        </div>`:''}
+
+        <!-- 기획 전략 -->
+        ${r.report?.planningReason?`<div style="margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:800;color:#1c2240;margin-bottom:6px;"><span style="background:#ede9fe;border-radius:50px;padding:2px 9px;font-size:11px;color:#7c3aed;">🗺 기획 전략 및 구성 이유</span></div>
+          <div style="font-size:12px;color:#374151;line-height:1.85;background:#fff;border:1px solid #f0f4ff;border-radius:8px;padding:12px 14px;">${r.report.planningReason}</div>
+        </div>`:''}
+
+        <!-- 콘텐츠/디자인 전략 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          ${r.report?.contentStrategy?`<div>
+            <div style="font-size:11px;font-weight:800;color:#1c2240;margin-bottom:5px;">✍️ 콘텐츠 전략</div>
+            <div style="font-size:11px;color:#374151;line-height:1.75;background:#fff;border:1px solid #f0f4ff;border-radius:8px;padding:10px 12px;">${r.report.contentStrategy}</div>
+          </div>`:''}
+          ${r.report?.designStrategy?`<div>
+            <div style="font-size:11px;font-weight:800;color:#1c2240;margin-bottom:5px;">🎨 디자인 전략</div>
+            <div style="font-size:11px;color:#374151;line-height:1.75;background:#fff;border:1px solid #f0f4ff;border-radius:8px;padding:10px 12px;">${r.report.designStrategy}</div>
+          </div>`:''}
+        </div>
+
+        <!-- 주의사항 -->
+        ${r.report?.caution?`<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:800;color:#c2410c;margin-bottom:5px;">⚠️ 기획 시 주의사항</div>
+          <div style="font-size:11px;color:#9a3412;line-height:1.75;">${r.report.caution}</div>
+        </div>`:''}
+
       </div>
     </div>
 
@@ -704,15 +795,13 @@ function renderResult(r,name,feat,prc){
 
     const slidesHtml=slides.map((sl,si)=>{
       const pid=`s${i}x${si}`;
-      const subtextLines=(sl.subtext||'').split(/\d+\.\s+/).filter(s=>s.trim());
-      const listHtml=subtextLines.length>0
-        ?`<ol class="slide-list">${subtextLines.map(l=>`<li>${l.trim()}</li>`).join('')}</ol>`
-        :`<p style="font-size:12px;color:#374151;margin-bottom:8px;line-height:1.65;">${sl.subtext||''}</p>`;
+      // subtext를 그대로 표시 (형식 자유 - AI가 상황에 맞게 결정)
+      const subtextHtml=`<div style="font-size:12px;color:#374151;margin-bottom:10px;line-height:1.8;white-space:pre-line;">${sl.subtext||''}</div>`;
       const koPrompt=sl.imagePromptKo||sl.aiPhotoTip||'';
 
       return `<div class="slide-body">
         <div class="slide-hl">${sl.headline||''}</div>
-        ${listHtml}
+        ${subtextHtml}
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">${(sl.tags||[]).map(t=>`<span class="stag">${t}</span>`).join('')}</div>
         <div class="pbox pbox-prompt">
           <div class="pbox-label">📸 이미지 프롬프트 (수정 가능)</div>
