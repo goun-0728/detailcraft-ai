@@ -188,6 +188,32 @@ textarea.fi{resize:vertical;min-height:60px;line-height:1.6;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:#c5cfe5;border-radius:3px;}
 .left::-webkit-scrollbar-thumb{background:#c5cfe5;}
+
+/* ── 모바일 스텝 UI ── */
+.step-wrap{display:none;flex-direction:column;height:calc(100vh - 58px);background:#f2f5fb;}
+.step-progress{display:flex;gap:4px;margin-bottom:16px;}
+.step-dot{flex:1;height:4px;border-radius:2px;background:#dce3f5;transition:background .3s;}
+.step-dot.done{background:#4f46e5;}
+.step-dot.active{background:#a5b4fc;}
+.step-header{padding:20px 20px 0;}
+.step-title{font-size:18px;font-weight:800;color:#1c2240;margin-bottom:4px;}
+.step-hint{font-size:12px;color:#7880a0;margin-bottom:20px;}
+.step-body{flex:1;overflow-y:auto;padding:0 20px 20px;}
+.step-footer{padding:16px 20px;border-top:1px solid #dce3f5;display:flex;gap:10px;background:#fff;}
+.step-btn-next{flex:1;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:12px;padding:14px;color:#fff;font-size:15px;font-weight:700;font-family:'Noto Sans KR';cursor:pointer;}
+.step-btn-prev{background:#f0f4ff;border:1px solid #dce3f5;border-radius:12px;padding:14px 20px;color:#4f46e5;font-size:15px;font-weight:700;font-family:'Noto Sans KR';cursor:pointer;}
+.step-card{background:#fff;border:1.5px solid #dce3f5;border-radius:14px;padding:16px;margin-bottom:12px;}
+.step-card-label{font-size:11px;font-weight:700;color:#7880a0;margin-bottom:6px;}
+.step-fi{background:#f8f9ff;border:1.5px solid #dce3f5;border-radius:10px;padding:12px 14px;font-size:14px;color:#1c2240;font-family:'Noto Sans KR';width:100%;outline:none;transition:border-color .18s;}
+.step-fi:focus{border-color:#4f46e5;}
+.step-fi::placeholder{color:#b2bcd4;}
+.step-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237880a0' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+.step-result-wrap{flex:1;overflow-y:auto;padding:16px;}
+
+@media(max-width:768px){
+  .layout{display:none!important;}
+  .step-wrap{display:flex!important;}
+}
 </style>
 </head>
 <body>
@@ -727,6 +753,39 @@ function extractJSONFallback(str) {
 /* ── RENDER ── */
 const SEC_COLORS=['#6366f1','#f472b6','#34d399','#fbbf24','#60a5fa','#a78bfa'];
 const SEC_ICONS={1:'😩',2:'💡',3:'✨',4:'⚡',5:'🏆',6:'🛒'};
+const SEC_DESIGN_COMMENTS={
+  1:'👁 첫인상이 전부입니다. 배경 이미지는 감성적이고 고해상도로, 텍스트는 굵고 크게. 소비자가 0.3초 안에 공감해야 스크롤을 내립니다.',
+  2:'😤 불편함을 시각적으로 극대화하세요. 텍스트보다 아이콘·이모지 활용, 체크리스트 형식이 공감도를 높입니다.',
+  3:'💥 제품 등장 순간은 드라마틱하게. 큰 제품 이미지 + 강조색 배경 조합이 효과적입니다. Before/After 구도도 추천.',
+  4:'🔬 각 특징은 아이콘+제목+한줄설명 카드 형식으로. 2열 그리드가 모바일에서 가장 가독성이 좋습니다.',
+  5:'⭐ 숫자와 후기는 구매 결정의 핵심입니다. 리뷰는 실제 고객처럼 자연스럽게, 수치는 크고 눈에 띄게.',
+  6:'🛒 CTA 버튼은 화면 전체 너비로, 강조색 사용. 가격은 크게, 혜택(무료배송 등)은 함께 표기하세요.',
+};
+
+/* GPT로 한글→영어 번역 */
+async function translateToEnglish(koreanText, promptId) {
+  const btn = document.querySelector(`[data-translate="${promptId}"]`);
+  if(btn){ btn.textContent='번역 중...'; btn.disabled=true; }
+  try {
+    const res = await fetch('/api/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'gpt-4o',
+        max_tokens:500,
+        system:'You are a professional photography prompt translator. Translate Korean photography/image prompts to English. Output only the translated English prompt, no explanations, no quotes, single paragraph.',
+        messages:[{role:'user', content:`Translate this Korean image prompt to professional English photography prompt:\n\n${koreanText}`}]
+      })
+    });
+    const data = await res.json();
+    const translated = data.content?.[0]?.text || '';
+    if(translated){
+      const engEl = document.getElementById('eng_'+promptId);
+      if(engEl) engEl.textContent = translated;
+    }
+  } catch(e){ console.error(e); }
+  if(btn){ btn.textContent='🔄 영어로 번역'; btn.disabled=false; }
+}
 
 function renderResult(r,name,feat,prc){
   document.getElementById('emptyState').style.display='none';
@@ -740,18 +799,22 @@ function renderResult(r,name,feat,prc){
   const tcm=r.textMutedHex||'#666';
   const surf=r.surfaceHex||'#fff';
 
+  /* 기획 보고서 생성 */
+  const reportHtml = buildReport(r, name, feat, prc);
+
   box.innerHTML=`
     <div class="rh">
-      <div class="rh-title">📋 ${name}</div>
-      <div class="rh-meta">상세페이지 기획 완료 · 각 섹션을 시각적으로 확인하세요</div>
+      <div class="rh-title">📋 ${name} 상세페이지 기획</div>
+      <div class="rh-meta">기획 완료 · 섹션별 카피 · 이미지 프롬프트 · 디자인 가이드 포함</div>
       <div class="rh-badge">${EMOJI[r.themeKey]||'✨'} ${r.themeName} · ${r.colorScheme}</div>
     </div>
+    ${reportHtml}
     <div class="pgrid" id="planGrid"></div>
   `;
 
   const grid=document.getElementById('planGrid');
 
-  /* 섹션별 비주얼 카드 */
+  /* 섹션별 카드 */
   (r.sections||[]).forEach((sec,i)=>{
     const col=SEC_COLORS[i%SEC_COLORS.length];
     const slides=sec.slides||[];
@@ -759,34 +822,54 @@ function renderResult(r,name,feat,prc){
     card.className='vscard';card.style.animationDelay=(i*0.07)+'s';
 
     const slidesHtml=slides.map((sl,si)=>{
-      const pid=`p_${i}_${si}`;
-      const svgMock=buildSlideSVG(sl,r,sec.order,col);
+      const pid=`s${i}_${si}`;
+      /* 번호형 리스트: subtext를 줄바꿈으로 분리해서 번호 붙이기 */
+      const subtextLines=(sl.subtext||'').split(/[.。\n]/).map(s=>s.trim()).filter(Boolean);
+      const numberedList=subtextLines.length>1
+        ? `<ol style="margin:6px 0 8px 16px;padding:0;display:flex;flex-direction:column;gap:4px;">${subtextLines.map(l=>`<li style="font-size:12px;color:#4b5563;line-height:1.6;">${l}</li>`).join('')}</ol>`
+        : `<p style="font-size:12px;color:#7880a0;line-height:1.65;margin-bottom:8px;">${sl.subtext||''}</p>`;
+
       return `
         <div class="vslide">
-          <div class="vs-preview">${svgMock}</div>
-          <div class="vs-info">
+          <div class="vs-info" style="padding:16px 20px;">
             <div class="vs-headline">${sl.headline||''}</div>
-            <div class="vs-sub">${sl.subtext||''}</div>
-            <div class="vs-tags">${(sl.tags||[]).map(t=>`<span class="vs-tag">${t}</span>`).join('')}</div>
-            ${sl.aiPhotoTip?`<div class="vs-prompt-mini" style="border-color:rgba(251,191,36,.2)">
-              <div class="vs-prompt-mini-label" style="color:#fbbf24;">📷 사진 촬영 가이드</div>
-              <div class="vs-prompt-mini-text" style="font-family:'Noto Sans KR';font-size:11px;color:#d4a;">${sl.aiPhotoTip}</div>
+            ${numberedList}
+            <div class="vs-tags" style="margin-bottom:10px;">${(sl.tags||[]).map(t=>`<span class="vs-tag">${t}</span>`).join('')}</div>
+
+            ${sl.aiPhotoTip?`
+            <div class="prompt-block" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+              <div style="font-size:10px;color:#d97706;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px;">📷 촬영 가이드 (사진 없을 때)</div>
+              <textarea id="ko_${pid}" style="width:100%;background:transparent;border:none;outline:none;font-family:'Noto Sans KR';font-size:12px;color:#92400e;line-height:1.65;resize:vertical;min-height:52px;">${sl.aiPhotoTip}</textarea>
+              <button data-translate="${pid}" onclick="translateToEnglish(document.getElementById('ko_${pid}').value,'${pid}')" style="margin-top:6px;background:#fef3c7;border:1px solid #fde68a;border-radius:5px;padding:4px 10px;color:#d97706;font-size:11px;cursor:pointer;font-family:'Noto Sans KR';">🔄 영어로 번역</button>
             </div>`:''}
-            <div class="vs-prompt-mini">
-              <div class="vs-prompt-mini-label">🤖 DALL-E / Midjourney 프롬프트</div>
-              <div class="vs-prompt-mini-text" id="${pid}">${sl.imagePrompt||''}</div>
-              <button class="cpbtn" onclick="copyEl('${pid}',this)">📋 복사</button>
+
+            <div class="prompt-block" style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:8px;padding:10px 12px;margin-bottom:0;">
+              <div style="font-size:10px;color:#4f46e5;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px;">🤖 이미지 프롬프트</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="background:#fff;border:1px solid #e0e7ff;border-radius:6px;padding:8px 10px;">
+                  <div style="font-size:9px;color:#6366f1;font-weight:700;margin-bottom:3px;">🇰🇷 한국어 (수정 가능)</div>
+                  <textarea id="ko2_${pid}" style="width:100%;background:transparent;border:none;outline:none;font-family:'Noto Sans KR';font-size:11px;color:#374151;line-height:1.65;resize:vertical;min-height:44px;">${sl.aiPhotoTip||sl.imagePrompt||''}</textarea>
+                  <button data-translate="eng_${pid}" onclick="translateToEnglish(document.getElementById('ko2_${pid}').value,'eng_${pid}')" style="margin-top:4px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:5px;padding:3px 10px;color:#4f46e5;font-size:10px;cursor:pointer;font-family:'Noto Sans KR';">🔄 영어 프롬프트로 변환</button>
+                </div>
+                <div style="background:#1e1b4b;border-radius:6px;padding:8px 10px;">
+                  <div style="font-size:9px;color:#a5b4fc;font-weight:700;margin-bottom:3px;">🇺🇸 English Prompt (for DALL-E / Midjourney)</div>
+                  <div id="eng_${pid}" style="font-size:10.5px;color:#c7d2fe;font-family:'Courier New',monospace;line-height:1.65;white-space:pre-wrap;word-break:break-all;">${sl.imagePrompt||''}</div>
+                  <button onclick="copyEl('eng_${pid}',this)" style="margin-top:6px;background:#312e81;border:1px solid #4338ca;border-radius:5px;padding:3px 10px;color:#a5b4fc;font-size:10px;cursor:pointer;font-family:'Noto Sans KR';">📋 영문 프롬프트 복사</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>`;
     }).join('');
 
+    const designComment = SEC_DESIGN_COMMENTS[sec.order]||'';
     card.innerHTML=`
       <div class="vscard-head">
         <div class="vsnum" style="background:${col}">${SEC_ICONS[sec.order]||sec.order}</div>
         <div class="vsname">${sec.name||''}</div>
         <div class="vspurpose">${sec.purpose||''}</div>
       </div>
+      ${designComment?`<div style="padding:8px 16px;background:#f8f9ff;border-bottom:1px solid #dce3f5;font-size:11px;color:#6366f1;line-height:1.6;">${designComment}</div>`:''}
       <div class="vscard-body">${slidesHtml}</div>`;
     grid.appendChild(card);
   });
@@ -798,32 +881,26 @@ function renderResult(r,name,feat,prc){
   const feats=feat.split(',').map(f=>f.trim()).filter(Boolean);
   const featIcons=['🔬','💪','🌿','⚡','🛡','✨','🎯','🔥'];
   const featSection=r.sections?.find(s=>s.order===4);
-  const featSlides=featSection?.slides||feats.map((f,i)=>({headline:f,subtext:'',tags:[]}));
-
+  const featSlides=featSection?.slides||feats.map((f)=>({headline:f,subtext:'',tags:[]}));
   const specRows=(r.specTable||[]).map(row=>`
     <div class="sp-spec-row" style="border-color:${tc}18;">
       <div class="sp-spec-key" style="color:${tcm};">${row.key}</div>
       <div class="sp-spec-val" style="color:${tc};">${row.val}</div>
     </div>`).join('');
-
   const reviewsHtml=(r.reviews||[]).map(rv=>`
     <div class="sp-review-item" style="background:${surf};border:1px solid ${tc}12;">
       <div class="sp-stars">${'★'.repeat(rv.stars||5)}${'☆'.repeat(5-(rv.stars||5))}</div>
       <div class="sp-review-text" style="color:${tc};">${rv.text||''}</div>
       <div class="sp-review-author" style="color:${tcm};">✔ 구매 확인 · ${rv.author||'구매자'}</div>
     </div>`).join('');
-
   const trustHtml=(r.trustNumbers||[]).map(tn=>`
     <div class="sp-trust-item" style="background:${acc}18;border:1px solid ${acc}30;">
       <div class="sp-trust-num" style="color:${acc};">${tn.num||''}</div>
       <div class="sp-trust-label" style="color:${tc};">${tn.label||''}</div>
     </div>`).join('');
-
-  /* 섹션1(공감) 텍스트 */
   const s1=r.sections?.[0]?.slides?.[0];
-  const s2=r.sections?.[1]?.slides?.[0];
   const s3=r.sections?.[2]?.slides?.[0];
-  const painItems=feat.split(',').slice(0,3).map(f=>`<div class="sp-pain-item" style="color:${tc}85;"><span>❌</span><span>${f.trim()}이 부족한 제품, 이제 그만</span></div>`).join('');
+  const painItems=feats.slice(0,3).map(f=>`<div class="sp-pain-item" style="color:${tc}85;"><span>❌</span><span>${f} 문제로 고민하셨나요?</span></div>`).join('');
 
   fp.innerHTML=`
     <div class="fp-head">
@@ -833,10 +910,7 @@ function renderResult(r,name,feat,prc){
     </div>
     <div class="fp-body">
       <div class="fp-note">※ 실제 상세페이지 구성과 색감을 미리 확인하는 레이아웃입니다</div>
-
       <div class="sp-container" style="background:${bg};color:${tc};font-family:'Noto Sans KR',sans-serif;">
-
-        <!-- HERO -->
         <div class="sp-block sp-hero" style="background:${acc};color:#fff;">
           <div class="sp-hero-img" style="background:rgba(255,255,255,.12);">📸 메인 제품 이미지 (히어로)</div>
           <div class="sp-eyebrow">${r.themeName} · ${r.colorScheme}</div>
@@ -845,29 +919,19 @@ function renderResult(r,name,feat,prc){
           ${prc?`<div class="sp-price-badge" style="background:rgba(255,255,255,.2);color:#fff;">💰 ${prc}</div>`:''}
           <div class="sp-cta-hero" style="background:#fff;color:${acc};">지금 구매하기 →</div>
         </div>
-
-        <!-- PAIN / 공감 -->
         <div class="sp-block sp-pain" style="background:${bgSec};color:${tc};">
           <div class="sp-pain-icon">😩</div>
           <div class="sp-pain-title">${s1?.headline||'이런 고민, 혹시 나만 하는 건가요?'}</div>
-          <div class="sp-pain-desc" style="color:${tcm};">${s1?.subtext||'많은 분들이 같은 고민을 하고 있습니다.'}</div>
+          <div class="sp-pain-desc" style="color:${tcm};">${s1?.subtext||''}</div>
           <div class="sp-pain-list">${painItems}</div>
         </div>
-
-        <!-- 구분선 -->
-        <div style="padding:20px;text-align:center;background:${bg};">
-          <div class="sp-divider" style="background:${acc};"></div>
-        </div>
-
-        <!-- SOLUTION -->
+        <div style="padding:20px;text-align:center;background:${bg};"><div class="sp-divider" style="background:${acc};"></div></div>
         <div class="sp-block sp-solution" style="background:${bg};color:${tc};">
           <div class="sp-sol-badge" style="background:${acc}20;color:${acc};">✅ 해결책</div>
           <div class="sp-sol-title">${s3?.headline||name+', 이제 다릅니다'}</div>
           <div class="sp-sol-desc" style="color:${tcm};">${s3?.subtext||''}</div>
-          <div style="width:100%;height:160px;background:${acc}15;border-radius:10px;display:flex;align-items:center;justify-content:center;color:${tcm};font-size:13px;margin-top:16px;border:1px dashed ${acc}40;">📸 제품 메인 컷 (클로즈업)</div>
+          <div style="width:100%;height:160px;background:${acc}15;border-radius:10px;display:flex;align-items:center;justify-content:center;color:${tcm};font-size:13px;margin-top:16px;border:1px dashed ${acc}40;">📸 제품 메인 컷</div>
         </div>
-
-        <!-- FEATURES GRID -->
         <div style="padding:10px 16px 4px;background:${bg};"><div style="font-size:14px;font-weight:800;color:${tc};">핵심 특징</div></div>
         <div class="sp-feat-grid" style="background:${bg};">
           ${featSlides.slice(0,4).map((sl,idx)=>`
@@ -877,36 +941,21 @@ function renderResult(r,name,feat,prc){
               <div class="sp-feat-desc" style="color:${tcm};">${sl.subtext||''}</div>
             </div>`).join('')}
         </div>
-
-        <!-- DETAIL SHOTS -->
         <div style="padding:20px 16px;background:${bgSec};">
           <div style="font-size:14px;font-weight:800;color:${tc};margin-bottom:12px;">상세 컷</div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="height:140px;background:${surf};border-radius:8px;display:flex;align-items:center;justify-content:center;color:${tcm};font-size:12px;border:1px dashed ${tc}20;">📸 소재/디테일 클로즈업 컷</div>
-            <div style="height:140px;background:${surf};border-radius:8px;display:flex;align-items:center;justify-content:center;color:${tcm};font-size:12px;border:1px dashed ${tc}20;">📸 사용 환경/라이프스타일 컷</div>
-            <div style="height:140px;background:${surf};border-radius:8px;display:flex;align-items:center;justify-content:center;color:${tcm};font-size:12px;border:1px dashed ${tc}20;">📸 비교/before-after 컷</div>
+            <div style="height:120px;background:${surf};border-radius:8px;display:flex;align-items:center;justify-content:center;color:${tcm};font-size:12px;border:1px dashed ${tc}20;">📸 소재/디테일 클로즈업</div>
+            <div style="height:120px;background:${surf};border-radius:8px;display:flex;align-items:center;justify-content:center;color:${tcm};font-size:12px;border:1px dashed ${tc}20;">📸 라이프스타일 컷</div>
           </div>
         </div>
-
-        <!-- TRUST NUMBERS -->
         <div class="sp-block sp-trust" style="background:${bg};color:${tc};">
           <div class="sp-trust-title">${name}을 선택해야 하는 이유</div>
           <div class="sp-trust-grid">${trustHtml||`<div class="sp-trust-item" style="background:${acc}18;border:1px solid ${acc}30;"><div class="sp-trust-num" style="color:${acc};">4.9★</div><div class="sp-trust-label" style="color:${tc};">평균 평점</div></div>`}</div>
         </div>
-
-        <!-- SPEC TABLE -->
-        ${specRows?`<div class="sp-block sp-spec" style="background:${bgSec};color:${tc};">
-          <div class="sp-spec-title">제품 상세 정보</div>
-          ${specRows}
-        </div>`:''}
-
-        <!-- REVIEWS -->
+        ${specRows?`<div class="sp-block sp-spec" style="background:${bgSec};color:${tc};"><div class="sp-spec-title">제품 상세 정보</div>${specRows}</div>`:''}
         <div class="sp-block sp-review" style="background:${bg};color:${tc};">
-          <div class="sp-review-title">⭐ 구매 후기</div>
-          ${reviewsHtml}
+          <div class="sp-review-title">⭐ 구매 후기</div>${reviewsHtml}
         </div>
-
-        <!-- FINAL CTA -->
         <div class="sp-block sp-cta-final" style="background:${acc};color:#fff;">
           <div class="sp-cta-final-title">${r.heroHeadline||name}</div>
           <div class="sp-cta-final-sub">${r.heroSub||''}</div>
@@ -914,18 +963,56 @@ function renderResult(r,name,feat,prc){
           <div class="sp-cta-btn" style="background:#fff;color:${acc};">🛒 장바구니 담기</div>
           <div style="margin-top:10px;"><div class="sp-cta-btn" style="background:rgba(255,255,255,.2);color:#fff;font-size:13px;padding:11px 36px;">바로 구매하기</div></div>
         </div>
-
       </div>
 
-      <!-- 전체 샘플 이미지 프롬프트 -->
+      <!-- 전체 프롬프트 (아웃라인 없이 프롬프트만) -->
       <div class="sp-prompt-wrap">
-        <div class="sp-prompt-label">🖼 전체 상세페이지 이미지 생성 프롬프트 (ChatGPT DALL-E / Midjourney)</div>
+        <div class="sp-prompt-label">🖼 전체 상세페이지 이미지 생성 프롬프트 (DALL-E / Midjourney)</div>
         <div class="sp-prompt-text" id="fullPromptEl">${buildFullPrompt(r,name,prc)}</div>
         <button class="copybtn" style="margin-top:9px;" onclick="copyEl('fullPromptEl',this)">📋 전체 프롬프트 복사</button>
       </div>
     </div>`;
   grid.appendChild(fp);
   document.getElementById('rightPanel').scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── 기획 보고서 ── */
+function buildReport(r, name, feat, prc){
+  const feats = feat.split(',').map(f=>f.trim()).filter(Boolean);
+  const date = new Date().toLocaleDateString('ko-KR');
+  const themeDesc = {cozy:'생활 밀착형 감성 연출',sensual:'감각적 무드 중심',info:'정보·데이터 중심 신뢰 구축',luxury:'프리미엄 고급 이미지',minimal:'미니멀 여백의 미'};
+  return `
+  <div style="background:#fff;border:1px solid #dce3f5;border-radius:14px;padding:20px 22px;margin-bottom:14px;box-shadow:0 2px 12px rgba(79,70,229,.06);">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #f0f4ff;">
+      <div style="background:#4f46e5;color:#fff;border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;">📄</div>
+      <div>
+        <div style="font-size:13px;font-weight:800;color:#1c2240;">기획 보고서</div>
+        <div style="font-size:11px;color:#7880a0;">${date} · ${r.themeName} 테마</div>
+      </div>
+      <button onclick="copyEl('reportContent',this)" style="margin-left:auto;background:#eef0ff;border:1px solid #c7d0f8;border-radius:6px;padding:5px 12px;color:#4f46e5;font-size:11px;cursor:pointer;font-family:'Noto Sans KR';">📋 보고서 복사</button>
+    </div>
+    <div id="reportContent" style="font-size:12px;color:#374151;line-height:1.8;">
+      <strong style="color:#1c2240;">📌 제품명:</strong> ${name}<br>
+      <strong style="color:#1c2240;">💰 가격:</strong> ${prc||'미정'}<br>
+      <strong style="color:#1c2240;">🎨 테마/색감:</strong> ${r.themeName} · ${r.colorScheme}<br>
+      <strong style="color:#1c2240;">🎯 기획 방향:</strong> ${themeDesc[r.themeKey]||''}<br><br>
+
+      <strong style="color:#1c2240;">🔑 핵심 특징</strong><br>
+      ${feats.map((f,i)=>`${i+1}. ${f}`).join('<br>')}<br><br>
+
+      <strong style="color:#1c2240;">📋 상세페이지 구성 이유</strong><br>
+      1. <strong>공감 후킹</strong>으로 시작 → 소비자가 뒤로가기를 누르지 않도록 첫 화면에서 공감을 유도합니다.<br>
+      2. <strong>문제 심화</strong> → 불편함을 구체화해 제품의 필요성을 각인시킵니다.<br>
+      3. <strong>해결책 제시</strong> → 제품이 정확히 그 문제를 해결함을 보여줍니다.<br>
+      4. <strong>핵심 특징</strong> → 경쟁 제품과 차별화되는 강점을 강조합니다.<br>
+      5. <strong>신뢰/증거</strong> → 숫자와 후기로 구매 결정을 확신시킵니다.<br>
+      6. <strong>CTA</strong> → 구매 행동을 유도하는 마지막 전환 포인트입니다.<br><br>
+
+      <strong style="color:#1c2240;">🎨 디자인 총평</strong><br>
+      ${r.colorScheme} 색감을 기반으로 ${r.themeName} 분위기를 연출합니다.
+      모바일 최적화 레이아웃으로 스크롤 시 자연스럽게 구매 의도가 높아지도록 설계했습니다.
+    </div>
+  </div>`;
 }
 
 /* ── SVG SLIDE PREVIEW ── */
@@ -1030,5 +1117,278 @@ function copyEl(id,btn){
   });
 }
 </script>
+<!-- ══ 모바일 스텝 UI ══ -->
+<div class="step-wrap" id="stepWrap">
+  <div class="step-header">
+    <div class="step-progress" id="stepProgress"></div>
+    <div class="step-title" id="stepTitle"></div>
+    <div class="step-hint" id="stepHint"></div>
+  </div>
+  <div class="step-body" id="stepBody"></div>
+  <div class="step-footer" id="stepFooter"></div>
+</div>
+
+<script>
+/* ══ 모바일 스텝 로직 ══ */
+const STEPS_DEF = [
+  { title:'카테고리 선택', hint:'판매 중인 제품의 카테고리를 선택해주세요', type:'category' },
+  { title:'제품 기본 정보', hint:'제품명과 핵심 특징을 입력해주세요', type:'basic' },
+  { title:'타깃 & 가격', hint:'누구에게 팔고 얼마인가요?', type:'target' },
+  { title:'필수 기재사항', hint:'카테고리별 꼭 필요한 정보를 입력해주세요', type:'required' },
+  { title:'색감 & 테마', hint:'상세페이지 분위기를 선택해주세요', type:'theme' },
+  { title:'기획 생성!', hint:'모든 준비가 됐어요. 지금 바로 생성해볼까요?', type:'generate' },
+];
+
+let mStep = 0;
+const mData = {};
+
+function isMobile(){ return window.innerWidth <= 768; }
+
+function initMobileSteps(){
+  if(!isMobile()) return;
+  renderMobileStep();
+}
+
+function renderMobileStep(){
+  const s = STEPS_DEF[mStep];
+  // 진행바
+  const prog = document.getElementById('stepProgress');
+  prog.innerHTML = STEPS_DEF.map((_,i)=>`<div class="step-dot ${i<mStep?'done':i===mStep?'active':''}"></div>`).join('');
+  document.getElementById('stepTitle').textContent = s.title;
+  document.getElementById('stepHint').textContent = s.hint;
+
+  const body = document.getElementById('stepBody');
+  const footer = document.getElementById('stepFooter');
+
+  // 콘텐츠
+  if(s.type==='category'){
+    body.innerHTML = `<div class="step-card"><div class="step-card-label">네이버 카테고리</div>
+      <select class="step-fi step-select" id="m_category" onchange="mData.category=this.value;onMobileCatChange();" style="height:48px;">
+        ${document.getElementById('category').innerHTML}
+      </select>
+      ${mData.category?`<div id="mReqFields" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>`:''}
+    </div>`;
+    if(mData.category){ document.getElementById('m_category').value=mData.category; onMobileCatChange(); }
+  } else if(s.type==='basic'){
+    body.innerHTML = `
+      <div class="step-card"><div class="step-card-label">제품명</div>
+        <input class="step-fi" id="m_name" placeholder="예: 순면 항균 발냄새 양말 3종 세트" value="${mData.name||''}"/>
+      </div>
+      <div class="step-card"><div class="step-card-label">핵심 특징 (쉼표 구분, 3~5개)</div>
+        <input class="step-fi" id="m_feat" placeholder="예: 항균, 흡습속건, 발목 무압박" value="${mData.feat||''}"/>
+      </div>
+      <div class="step-card"><div class="step-card-label">추가 강조 사항 (선택)</div>
+        <textarea class="step-fi" id="m_extra" placeholder="수상이력, 특허, 누적판매량 등" style="min-height:80px;resize:none;">${mData.extra||''}</textarea>
+      </div>`;
+  } else if(s.type==='target'){
+    body.innerHTML = `
+      <div class="step-card"><div class="step-card-label">타깃 고객</div>
+        <input class="step-fi" id="m_target" placeholder="예: 발 냄새 고민 있는 직장인 남성 20~40대" value="${mData.target||''}"/>
+      </div>
+      <div class="step-card"><div class="step-card-label">판매 가격</div>
+        <input class="step-fi" id="m_price" placeholder="예: 12,900원" value="${mData.price||''}"/>
+      </div>`;
+  } else if(s.type==='required'){
+    const catFields = CAT_FIELDS[mData.category]||[];
+    if(!catFields.length){ body.innerHTML=`<div class="step-card" style="text-align:center;color:#7880a0;padding:30px;">이 카테고리는<br>추가 필수 항목이 없어요 ✅</div>`; }
+    else {
+      body.innerHTML = catFields.map(f=>`
+        <div class="step-card"><div class="step-card-label">${f.label}${f.req?'<span style="color:#ef4444;margin-left:4px;">*</span>':''}</div>
+          ${f.type==='textarea'
+            ? `<textarea class="step-fi" id="mreq_${f.id}" placeholder="${f.ph}" style="min-height:70px;resize:none;">${mData.req?.[f.id]||''}</textarea>`
+            : `<input class="step-fi" id="mreq_${f.id}" placeholder="${f.ph}" value="${mData.req?.[f.id]||''}"/>`}
+        </div>`).join('');
+    }
+  } else if(s.type==='theme'){
+    const colorMap2=[
+      {k:'auto',label:'자동',g:'linear-gradient(135deg,#667eea,#764ba2,#f093fb)'},
+      {k:'warm',label:'웜 핑크',g:'linear-gradient(135deg,#ff9a9e,#fecfef)'},
+      {k:'nature',label:'내추럴',g:'linear-gradient(135deg,#96fbc4,#f9f586)'},
+      {k:'ocean',label:'블루',g:'linear-gradient(135deg,#a1c4fd,#c2e9fb)'},
+      {k:'luxury',label:'블랙골드',g:'linear-gradient(135deg,#1a1a1a,#d4af37)'},
+      {k:'earth',label:'어스톤',g:'linear-gradient(135deg,#c8a882,#8d6e52)'},
+      {k:'purple',label:'라벤더',g:'linear-gradient(135deg,#a18cd1,#fbc2eb)'},
+      {k:'fresh',label:'프레시',g:'linear-gradient(135deg,#00b09b,#96c93d)'},
+    ];
+    const themeMap2=[
+      {k:'cozy',icon:'🏡',name:'편안한 일상',desc:'따뜻하고 친근한 생활감'},
+      {k:'sensual',icon:'✨',name:'감성 무드',desc:'세련되고 감각적'},
+      {k:'info',icon:'📊',name:'정보 중심',desc:'데이터·스펙 강조'},
+      {k:'luxury',icon:'👑',name:'프리미엄',desc:'고급스럽고 격조있게'},
+      {k:'minimal',icon:'⬜',name:'미니멀',desc:'깔끔한 여백의 미'},
+    ];
+    body.innerHTML = `
+      <div class="step-card">
+        <div class="step-card-label">색감 선택</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px;">
+          ${colorMap2.map(c=>`
+            <div onclick="mData.color='${c.k}';this.parentElement.querySelectorAll('.mcsw').forEach(e=>e.classList.remove('mactive'));this.querySelector('.mcsw').classList.add('mactive');" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;">
+              <div class="mcsw ${(mData.color||'auto')===c.k?'mactive':''}" style="width:44px;height:44px;border-radius:9px;background:${c.g};border:${(mData.color||'auto')===c.k?'2.5px solid #4f46e5':'2.5px solid transparent'};box-shadow:0 2px 7px rgba(0,0,0,.09);transition:all .18s;"></div>
+              <div style="font-size:10px;color:#7880a0;">${c.label}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-card-label">분위기 테마</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${themeMap2.map(t=>`
+            <div onclick="mData.theme='${t.k}';this.parentElement.querySelectorAll('.mtitem').forEach(e=>e.classList.remove('mtactive'));this.classList.add('mtactive');" class="mtitem ${(mData.theme||'cozy')===t.k?'mtactive':''}" style="background:${(mData.theme||'cozy')===t.k?'#eef0ff':'#f8f9ff'};border:1.5px solid ${(mData.theme||'cozy')===t.k?'#4f46e5':'#dce3f5'};border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .18s;">
+              <span style="font-size:18px;">${t.icon}</span>
+              <div><div style="font-size:13px;font-weight:700;color:#1c2240;">${t.name}</div><div style="font-size:11px;color:#7880a0;">${t.desc}</div></div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  } else if(s.type==='generate'){
+    body.innerHTML = `
+      <div style="text-align:center;padding:30px 20px;">
+        <div style="font-size:56px;margin-bottom:16px;">🚀</div>
+        <div style="font-size:17px;font-weight:800;color:#1c2240;margin-bottom:8px;">${mData.name||'제품'} 기획 준비 완료!</div>
+        <div style="font-size:13px;color:#7880a0;line-height:1.7;margin-bottom:24px;">AI가 스토리텔링 상세페이지를<br>지금 바로 기획해드릴게요.</div>
+        <div style="background:#f0f4ff;border:1px solid #dce3f5;border-radius:12px;padding:14px;text-align:left;font-size:12px;color:#4b5563;line-height:1.8;">
+          <strong>카테고리:</strong> ${mData.category||'-'}<br>
+          <strong>제품명:</strong> ${mData.name||'-'}<br>
+          <strong>특징:</strong> ${mData.feat||'-'}<br>
+          <strong>타깃:</strong> ${mData.target||'-'}<br>
+          <strong>가격:</strong> ${mData.price||'-'}<br>
+          <strong>테마:</strong> ${mData.theme||'cozy'}
+        </div>
+      </div>`;
+  }
+
+  // 버튼
+  footer.innerHTML = `
+    ${mStep>0?`<button class="step-btn-prev" onclick="mStepPrev()">← 이전</button>`:''}
+    <button class="step-btn-next" onclick="mStepNext()">${mStep===STEPS_DEF.length-1?'🚀 기획 생성':'다음 →'}</button>
+  `;
+}
+
+function onMobileCatChange(){
+  mData.category = document.getElementById('m_category')?.value||'';
+  const fields = CAT_FIELDS[mData.category]||[];
+  const wrap = document.getElementById('mReqFields');
+  if(!wrap) return;
+  if(!fields.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = `<div style="font-size:11px;font-weight:700;color:#7880a0;margin-bottom:4px;">카테고리 필수 항목 미리보기</div>`+
+    fields.slice(0,2).map(f=>`<input class="step-fi" placeholder="${f.label}: ${f.ph.slice(0,20)}..." style="font-size:12px;padding:8px 12px;"/>`).join('');
+}
+
+function saveMobileStep(){
+  const s = STEPS_DEF[mStep];
+  if(s.type==='category'){ mData.category=document.getElementById('m_category')?.value||''; }
+  else if(s.type==='basic'){
+    mData.name=document.getElementById('m_name')?.value||'';
+    mData.feat=document.getElementById('m_feat')?.value||'';
+    mData.extra=document.getElementById('m_extra')?.value||'';
+  } else if(s.type==='target'){
+    mData.target=document.getElementById('m_target')?.value||'';
+    mData.price=document.getElementById('m_price')?.value||'';
+  } else if(s.type==='required'){
+    mData.req={};
+    (CAT_FIELDS[mData.category]||[]).forEach(f=>{
+      const el=document.getElementById('mreq_'+f.id);
+      if(el) mData.req[f.id]=el.value;
+    });
+  } else if(s.type==='theme'){
+    // 이미 onclick에서 저장됨
+    if(!mData.color) mData.color='auto';
+    if(!mData.theme) mData.theme='cozy';
+  }
+}
+
+function mStepNext(){
+  saveMobileStep();
+  if(mStep===STEPS_DEF.length-1){
+    mGeneratePlan();
+    return;
+  }
+  // required 스텝: 카테고리 필드 없으면 스킵
+  if(mStep===2 && (!CAT_FIELDS[mData.category]||!CAT_FIELDS[mData.category].length)){
+    mStep+=2;
+  } else {
+    mStep++;
+  }
+  renderMobileStep();
+}
+
+function mStepPrev(){
+  saveMobileStep();
+  if(mStep===4 && (!CAT_FIELDS[mData.category]||!CAT_FIELDS[mData.category].length)){
+    mStep-=2;
+  } else {
+    mStep--;
+  }
+  renderMobileStep();
+}
+
+async function mGeneratePlan(){
+  // 데스크탑 generate 함수와 동일 로직을 모바일 데이터로 실행
+  document.getElementById('stepBody').innerHTML=`
+    <div style="text-align:center;padding:60px 20px;">
+      <div class="spin" style="margin:0 auto 16px;"></div>
+      <div style="font-size:14px;color:#1c2240;font-weight:600;">AI가 기획 중입니다...</div>
+      <div style="font-size:12px;color:#7880a0;margin-top:6px;" id="mLoadStep">소비자 심리 분석 중...</div>
+    </div>`;
+  document.getElementById('stepFooter').innerHTML='';
+
+  let si=0;
+  const timer=setInterval(()=>{
+    const el=document.getElementById('mLoadStep');
+    if(el) el.textContent=STEPS[si++%STEPS.length];
+  },1700);
+
+  // 데이터 통합
+  document.getElementById('category').value=mData.category||'';
+  document.getElementById('productName').value=mData.name||'';
+  document.getElementById('features').value=mData.feat||'';
+  document.getElementById('target').value=mData.target||'';
+  document.getElementById('price').value=mData.price||'';
+  document.getElementById('extra').value=mData.extra||'';
+  selColor=mData.color||'auto';
+  selTheme=mData.theme||'cozy';
+
+  try {
+    await generate();
+  } catch(e){}
+
+  clearInterval(timer);
+
+  // 결과를 모바일 영역에 표시
+  const resultBox=document.getElementById('resultBox');
+  const stepWrap=document.getElementById('stepWrap');
+  stepWrap.innerHTML='';
+
+  const mResultWrap=document.createElement('div');
+  mResultWrap.style.cssText='height:calc(100vh - 58px);overflow-y:auto;background:#f0f4ff;padding:16px;';
+  mResultWrap.appendChild(resultBox.cloneNode(true));
+
+  const backBtn=document.createElement('button');
+  backBtn.textContent='← 다시 기획하기';
+  backBtn.style.cssText='display:block;width:100%;background:#4f46e5;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;font-family:"Noto Sans KR";cursor:pointer;margin-bottom:14px;';
+  backBtn.onclick=()=>{ mStep=0; stepWrap.innerHTML=''; initMobileStepHTML(); initMobileSteps(); };
+  mResultWrap.prepend(backBtn);
+
+  stepWrap.appendChild(mResultWrap);
+}
+
+function initMobileStepHTML(){
+  document.getElementById('stepWrap').innerHTML=`
+    <div class="step-header">
+      <div class="step-progress" id="stepProgress"></div>
+      <div class="step-title" id="stepTitle"></div>
+      <div class="step-hint" id="stepHint"></div>
+    </div>
+    <div class="step-body" id="stepBody"></div>
+    <div class="step-footer" id="stepFooter"></div>
+  `;
+}
+
+window.addEventListener('load', initMobileSteps);
+window.addEventListener('resize', ()=>{
+  if(isMobile() && document.getElementById('stepBody') && !document.getElementById('stepBody').innerHTML){
+    initMobileSteps();
+  }
+});
+</script>
+
 </body>
 </html>
