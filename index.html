@@ -188,10 +188,10 @@ textarea.fi{resize:vertical;min-height:60px;line-height:1.6;}
 @media(max-width:768px){
   .pc-layout{display:none!important;}
   .mob-wrap{display:flex!important;}
-  body{overflow:hidden;position:fixed;width:100%;height:100%;}
-  .hdr{position:fixed;top:0;left:0;right:0;z-index:300;}
-  .mob-wrap{position:fixed;top:56px;left:0;right:0;bottom:0;height:auto!important;}
-  .mob-result{position:fixed;top:56px;left:0;right:0;bottom:0;height:auto!important;}
+  body{overflow:hidden;}
+  .hdr{position:sticky;top:0;z-index:300;}
+  .mob-wrap{position:relative;height:calc(100vh - 56px);height:calc(100dvh - 56px);}
+  .mob-result{position:relative;height:calc(100vh - 56px);height:calc(100dvh - 56px);}
 }
 </style>
 </head>
