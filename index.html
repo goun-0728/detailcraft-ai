@@ -551,7 +551,14 @@ async function generate(){
   let si=0;const timer=setInterval(()=>{stepEl.textContent=STEPS[si++%STEPS.length];},1700);
   document.getElementById('genBtn').disabled=true;
 
-  const sys=`당신은 네이버 스마트스토어 상세페이지 전문 기획 AI입니다. 반드시 순수 JSON만 반환하세요. 규칙: 1)마크다운 코드블록 금지 2)JSON 문자열 안 큰따옴표 금지-작은따옴표로 대체 3)줄바꿈 금지-한 줄로 작성 4)모든 필드 한 줄 문자열로만`;
+  const sys=`당신은 네이버 스마트스토어 상세페이지 전문 기획 AI입니다. 반드시 순수 JSON만 반환하세요. 절대 규칙:
+1) 마크다운 코드블록 금지
+2) 모든 JSON 문자열 값 안에 큰따옴표(") 절대 금지 → 반드시 작은따옴표(')로 대체
+3) 모든 JSON 문자열 값 안에 줄바꿈 절대 금지 → 한 문장으로 이어서 작성
+4) 모든 JSON 문자열 값 안에 백슬래시(\) 사용 금지
+5) report 각 필드는 반드시 하나의 긴 문자열로 작성 (줄바꿈 없이)
+6) imagePromptKo는 한국어 한 문장으로 작성
+7) 응답이 잘리지 않도록 간결하게 작성 (report 각 필드 200자 이내)`;
 
   const usr=`당신은 네이버 스마트스토어 상세페이지 전문 기획 컨설턴트입니다. 아래 제품을 분석하고 실제 시장 경쟁 환경과 소비자 구매 심리를 반영한 완성도 높은 상세페이지를 기획해주세요.
 
@@ -568,16 +575,7 @@ ${photoAnalysis?`제품사진AI분석: ${photoAnalysis}`:''}
 
 {"themeName":"${themeMap[selTheme]}","themeKey":"${selTheme}","colorScheme":"구체적 색상 설명","accentHex":"#XXXXXX","bgHex":"#XXXXXX","bgSecHex":"#XXXXXX","textHex":"#XXXXXX","textMutedHex":"#XXXXXX","surfaceHex":"#XXXXXX",
 
-"report":{
-  "marketAnalysis":"이 카테고리 시장 상황 분석. 경쟁 제품들의 일반적인 특징, 소비자 불만 패턴, 시장 트렌드를 150자 이상 구체적으로 서술. 따옴표 줄바꿈 금지",
-  "targetAnalysis":"타깃 소비자 심층 분석. 구매 동기, 핵심 니즈, 구매 결정 요인, 가장 많이 보는 키워드, 이탈 원인을 150자 이상 서술. 따옴표 줄바꿈 금지",
-  "competitiveEdge":"경쟁 우위 분석. 동종 제품 대비 이 제품만의 차별점, 가격 포지셔닝, 강조해야 할 USP를 100자 이상 서술. 따옴표 줄바꿈 금지",
-  "planningReason":"이 상세페이지 구성을 선택한 전략적 이유. 각 섹션이 왜 이 순서여야 하는지, 소비자 심리 흐름과 연결하여 150자 이상 서술. 따옴표 줄바꿈 금지",
-  "seoKeywords":"네이버 쇼핑 검색에서 이 제품이 노출될 수 있는 핵심 키워드 5~8개를 쉼표로 구분하여 나열",
-  "designStrategy":"디자인 전략. 색감 선택 이유, 폰트 방향, 이미지 톤, 레이아웃 핵심 원칙을 100자 이상 서술. 따옴표 줄바꿈 금지",
-  "contentStrategy":"콘텐츠 전략. 어떤 감정을 건드릴지, 어떤 언어 톤을 써야 할지, 무엇을 강조하고 무엇을 숨길지 100자 이상 서술. 따옴표 줄바꿈 금지",
-  "caution":"기획 시 주의사항. 이 카테고리에서 흔히 하는 실수, 소비자 이탈 원인, 피해야 할 표현이나 구성. 100자 이상 서술. 따옴표 줄바꿈 금지"
-},
+"report":{"marketAnalysis":"이 카테고리 시장 상황과 경쟁 제품 특징 소비자 불만 패턴 분석 (150자 이내 작은따옴표만 사용 줄바꿈금지)","targetAnalysis":"타깃 소비자 구매 동기와 핵심 니즈 분석 (150자 이내 작은따옴표만 사용 줄바꿈금지)","competitiveEdge":"경쟁 제품 대비 차별점과 USP (100자 이내 작은따옴표만 사용 줄바꿈금지)","planningReason":"이 구성을 선택한 전략적 이유와 소비자 심리 흐름 (150자 이내 작은따옴표만 사용 줄바꿈금지)","seoKeywords":"네이버 핵심 검색 키워드 5~7개 쉼표구분","designStrategy":"색감과 레이아웃 전략 (100자 이내 줄바꿈금지)","contentStrategy":"언어 톤과 강조 포인트 (100자 이내 줄바꿈금지)","caution":"흔한 실수와 피해야 할 표현 (100자 이내 줄바꿈금지)"},
 
 "sections":[
 {"order":1,"name":"공감 후킹","purpose":"뒤로가기 방지","slides":[{
@@ -625,12 +623,17 @@ ${photoAnalysis?`제품사진AI분석: ${photoAnalysis}`:''}
 
 
   try{
-    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o',max_tokens:6000,system:sys,messages:[{role:'user',content:usr}]})});
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o',max_tokens:8000,system:sys,messages:[{role:'user',content:usr}]})});
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
     const data=await res.json();
     const raw=(data.content||[]).map(b=>b.text||'').join('');
     const result=safeParseJSON(raw);
-    if(!result)throw new Error('JSON 파싱 실패. 다시 시도해주세요.');
+    if(!result){
+      // 파싱 실패 시 raw 일부를 콘솔에 출력하고 재시도 안내
+      console.error('파싱 실패 raw 앞부분:', raw.slice(0,500));
+      console.error('파싱 실패 raw 뒷부분:', raw.slice(-300));
+      throw new Error('JSON 파싱 실패. 다시 시도해주세요.\n\n(내용이 너무 길거나 특수문자가 포함된 경우 발생합니다)');
+    }
     clearInterval(timer);loadEl.classList.remove('show');
     usageLeft--;document.getElementById('usageCnt').textContent=usageLeft;
     renderResult(result,name,feat,prc);
@@ -643,13 +646,62 @@ ${photoAnalysis?`제품사진AI분석: ${photoAnalysis}`:''}
 
 /* ══ JSON 파싱 ══ */
 function safeParseJSON(raw){
+  // 1단계: 코드블록 제거
   let s=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+
+  // 2단계: 가장 바깥 {} 추출
   const a=s.indexOf('{'),b=s.lastIndexOf('}');
   if(a<0||b<0)return null;
   s=s.slice(a,b+1);
-  try{return JSON.parse(s);}catch(e){}
-  try{return JSON.parse(sanitize(s));}catch(e){}
+
+  // 3단계: 직접 파싱
+  try{return JSON.parse(s);}catch(e1){}
+
+  // 4단계: 제어문자 정리 후 파싱
+  try{return JSON.parse(sanitize(s));}catch(e2){}
+
+  // 5단계: report 필드만 별도 추출하고 나머지 파싱
+  try{
+    // report 블록 임시 제거 후 파싱
+    const withoutReport = s.replace(/"report"\s*:\s*\{[^}]*(?:\{[^}]*\}[^}]*)?\}/g, '"report":{}');
+    const base = JSON.parse(sanitize(withoutReport));
+    // report는 개별 필드 추출
+    base.report = extractReportFields(s);
+    return base;
+  }catch(e3){}
+
+  // 6단계: sections만이라도 추출
+  try{return extractFallback(s);}catch(e4){}
+
+  console.error('모든 파싱 실패. Raw 샘플:', s.slice(0,300));
   return null;
+}
+
+function extractReportFields(str){
+  const fields=['marketAnalysis','targetAnalysis','competitiveEdge','planningReason','seoKeywords','designStrategy','contentStrategy','caution'];
+  const result={};
+  fields.forEach(f=>{
+    const m=str.match(new RegExp(`"${f}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`));
+    if(m)result[f]=m[1].replace(/\\n/g,' ').replace(/\\"/g,"'");
+  });
+  return result;
+}
+
+function extractFallback(str){
+  const getStr=(key)=>{
+    const m=str.match(new RegExp(`"${key}"\\s*:\\s*"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)"`));
+    return m?m[1].replace(/\\n/g,' ').replace(/\\"/g,"'"):'';
+  };
+  return {
+    themeName:getStr('themeName'),themeKey:getStr('themeKey'),
+    colorScheme:getStr('colorScheme'),accentHex:getStr('accentHex')||'#6366f1',
+    bgHex:getStr('bgHex')||'#f5f5f5',bgSecHex:getStr('bgSecHex')||'#ebebeb',
+    textHex:getStr('textHex')||'#1c2240',textMutedHex:getStr('textMutedHex')||'#7880a0',
+    surfaceHex:getStr('surfaceHex')||'#ffffff',
+    heroHeadline:getStr('heroHeadline'),heroSub:getStr('heroSub'),
+    report:extractReportFields(str),
+    sections:[],trustNumbers:[],reviews:[],specTable:[],
+  };
 }
 function sanitize(str){
   let r='',inS=false,esc=false;
