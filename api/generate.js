@@ -1,22 +1,20 @@
-export const config = { runtime: 'edge' };
+// Edge 대신 Node.js 런타임 사용 (타임아웃 60초, Edge는 30초 제한)
+export const config = { runtime: 'nodejs', maxDuration: 60 };
 
-export default async function handler(req) {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  };
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
+export default async function handler(req, res) {
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') { res.status(204).end(); return; }
+  if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
+
   try {
-    const body = await req.json();
+    const body = req.body;
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'API key not configured' }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+
+    if (!apiKey) { res.status(500).json({ error: 'API key not configured' }); return; }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -25,7 +23,7 @@ export default async function handler(req) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: body.model || 'gpt-4o',
         max_tokens: body.max_tokens || 6000,
         messages: [
           { role: 'system', content: body.system || '' },
@@ -36,7 +34,12 @@ export default async function handler(req) {
 
     const data = await response.json();
 
-    // OpenAI 응답을 Anthropic 형식으로 변환
+    if (!response.ok) {
+      res.status(response.status).json({ error: data.error?.message || 'API error' });
+      return;
+    }
+
+    // OpenAI 응답을 기존 형식으로 변환
     const converted = {
       content: [{
         type: 'text',
@@ -44,12 +47,9 @@ export default async function handler(req) {
       }]
     };
 
-    return new Response(JSON.stringify(converted), {
-      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    res.status(200).json(converted);
+
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    res.status(500).json({ error: err.message });
   }
 }
