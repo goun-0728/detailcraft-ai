@@ -16,12 +16,12 @@
 body{font-family:'Noto Sans KR',sans-serif;min-height:100vh;background:var(--rb);overflow-x:hidden;}
 
 /* HEADER */
-.hdr{height:56px;background:#fff;border-bottom:1px solid var(--lb2);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(79,70,229,.07);}
-.logo{font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;background:linear-gradient(90deg,#4f46e5,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr{min-height:56px;background:#fff;border-bottom:1px solid var(--lb2);display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(79,70,229,.07);flex-wrap:nowrap;gap:8px;}
+.logo{font-family:'Bebas Neue';font-size:18px;letter-spacing:2px;background:linear-gradient(90deg,#4f46e5,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;flex-shrink:1;min-width:0;}
 .logo-sub{font-family:'Noto Sans KR';font-size:10px;color:var(--lm);display:block;-webkit-text-fill-color:var(--lm);margin-top:-2px;}
-.upill{background:var(--lal);border:1px solid #c7d0f8;border-radius:50px;padding:5px 14px;font-size:12px;color:var(--la);font-weight:600;display:flex;align-items:center;gap:6px;}
+.upill{background:var(--lal);border:1px solid #c7d0f8;border-radius:50px;padding:5px 10px;font-size:11px;color:var(--la);font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;}
 .udot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 6px #34d399;}
-.pbtn{background:linear-gradient(135deg,#4f46e5,#a855f7);border:none;border-radius:50px;padding:6px 16px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR';}
+.pbtn{background:linear-gradient(135deg,#4f46e5,#a855f7);border:none;border-radius:50px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR';white-space:nowrap;flex-shrink:0;}
 
 /* PC LAYOUT */
 .pc-layout{display:grid;grid-template-columns:390px 1fr;height:calc(100vh - 56px);}
@@ -154,13 +154,24 @@ textarea.fi{resize:vertical;min-height:60px;line-height:1.6;}
 .load-s{font-size:12px;color:#6366f1;animation:bl 1.4s ease infinite;}
 @keyframes bl{0%,100%{opacity:.35;}50%{opacity:1;}}
 
+/* 4지선답 */
+.q-block{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--lb2);}
+.q-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.q-title{font-size:12px;font-weight:700;color:var(--lt);margin-bottom:8px;line-height:1.5;}
+.q-opts{display:flex;flex-direction:column;gap:6px;}
+.qopt{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--lb2);border-radius:9px;padding:9px 12px;cursor:pointer;transition:all .18s;font-size:12px;color:var(--lt);}
+.qopt:hover{border-color:var(--la);background:var(--lal);}
+.qopt input[type=radio]{accent-color:var(--la);width:15px;height:15px;flex-shrink:0;}
+.q-other{flex-wrap:wrap;gap:5px;}
+.q-other-input{flex:1;min-width:100px;background:transparent;border:none;border-bottom:1.5px solid var(--lb2);outline:none;font-size:12px;color:var(--lt);font-family:'Noto Sans KR';padding:2px 4px;}
+
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-thumb{background:#c5cfe5;border-radius:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
 
 /* ── MOBILE STEP UI ── */
-.mob-wrap{display:none;flex-direction:column;height:calc(100vh - 56px);height:calc(100dvh - 56px);background:var(--lb);overflow:hidden;}
+.mob-wrap{display:none;flex-direction:column;height:calc(100vh - 56px);height:calc(100dvh - 56px);background:var(--lb);overflow:hidden;box-sizing:border-box;}
 .mob-prog-wrap{display:flex;gap:4px;margin-bottom:12px;}
 .mob-dot{flex:1;height:4px;border-radius:2px;background:var(--lb2);transition:background .3s;}
 .mob-dot.done{background:var(--la);}
@@ -182,16 +193,17 @@ textarea.fi{resize:vertical;min-height:60px;line-height:1.6;}
 .mob-req-label{font-size:11px;font-weight:600;color:var(--lm);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
 .mob-req-field input,.mob-req-field textarea{background:transparent;border:none;outline:none;font-family:'Noto Sans KR';font-size:13px;color:var(--lt);width:100%;padding:0;}
 .mob-req-field textarea{resize:none;min-height:44px;line-height:1.6;}
-.mob-result{height:calc(100vh - 56px);height:calc(100dvh - 56px);overflow-y:auto;background:var(--rb);padding:16px;-webkit-overflow-scrolling:touch;}
+.mob-result{height:calc(100vh - 56px);height:calc(100dvh - 56px);overflow-y:auto;background:var(--rb);padding:16px;-webkit-overflow-scrolling:touch;box-sizing:border-box;}
 .mob-back{display:block;width:100%;background:var(--la);color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;font-family:'Noto Sans KR';cursor:pointer;margin-bottom:14px;}
 
 @media(max-width:768px){
   .pc-layout{display:none!important;}
   .mob-wrap{display:flex!important;}
-  body{overflow:hidden;}
-  .hdr{position:sticky;top:0;z-index:300;}
-  .mob-wrap{position:relative;height:calc(100vh - 56px);height:calc(100dvh - 56px);}
-  .mob-result{position:relative;height:calc(100vh - 56px);height:calc(100dvh - 56px);}
+  .logo-sub{display:none;}
+  .hdr{padding:0 12px;min-height:52px;}
+  .mob-wrap{height:calc(100vh - 52px);height:calc(100dvh - 52px);}
+  .mob-result{height:calc(100vh - 52px);height:calc(100dvh - 52px);}
+  .pc-layout{height:calc(100vh - 52px);}
 }
 </style>
 </head>
@@ -293,7 +305,71 @@ textarea.fi{resize:vertical;min-height:60px;line-height:1.6;}
     <div id="reqFields"></div>
   </div>
 
-  <!-- 사진 업로드 -->
+  <!-- 4지선답 추가 정보 -->
+  <div class="lsec">
+    <div class="ltit">🎯 제품 특성 심층 분석</div>
+    <div style="font-size:11px;color:var(--lm);margin-bottom:12px;line-height:1.6;">해당하는 항목을 선택해주세요. 더 정확한 기획이 나옵니다.<br>해당 없으면 건너뛰어도 됩니다.</div>
+
+    <!-- Q1: 주요 구매 동기 -->
+    <div class="q-block" id="q1">
+      <div class="q-title">Q1. 고객이 이 제품을 구매하는 주요 이유는?</div>
+      <div class="q-opts">
+        <label class="qopt"><input type="radio" name="q1" value="problem"/> <span>기존 제품에 불만이 있어서 (문제 해결형)</span></label>
+        <label class="qopt"><input type="radio" name="q1" value="upgrade"/> <span>더 좋은 걸 원해서 (업그레이드형)</span></label>
+        <label class="qopt"><input type="radio" name="q1" value="emotion"/> <span>분위기/감성이 좋아서 (감성 소비형)</span></label>
+        <label class="qopt"><input type="radio" name="q1" value="price"/> <span>가격 대비 품질이 좋아서 (가성비형)</span></label>
+        <label class="qopt q-other"><input type="radio" name="q1" value="other"/> <span>직접 입력:</span> <input class="q-other-input" id="q1other" placeholder="구매 동기를 직접 입력" onclick="document.querySelector('[name=q1][value=other]').checked=true"/></label>
+      </div>
+    </div>
+
+    <!-- Q2: 경쟁 제품 대비 강점 -->
+    <div class="q-block" id="q2">
+      <div class="q-title">Q2. 경쟁 제품 대비 이 제품의 가장 큰 강점은?</div>
+      <div class="q-opts">
+        <label class="qopt"><input type="radio" name="q2" value="quality"/> <span>품질/소재/성분이 확실히 다름</span></label>
+        <label class="qopt"><input type="radio" name="q2" value="design"/> <span>디자인/패키징이 차별화됨</span></label>
+        <label class="qopt"><input type="radio" name="q2" value="price2"/> <span>동급 최저가 또는 가성비 최고</span></label>
+        <label class="qopt"><input type="radio" name="q2" value="trust"/> <span>브랜드 신뢰도/인증/수상 이력</span></label>
+        <label class="qopt q-other"><input type="radio" name="q2" value="other"/> <span>직접 입력:</span> <input class="q-other-input" id="q2other" placeholder="강점을 직접 입력" onclick="document.querySelector('[name=q2][value=other]').checked=true"/></label>
+      </div>
+    </div>
+
+    <!-- Q3: 구매 고민 포인트 -->
+    <div class="q-block" id="q3">
+      <div class="q-title">Q3. 고객이 구매 전 가장 많이 망설이는 이유는?</div>
+      <div class="q-opts">
+        <label class="qopt"><input type="radio" name="q3" value="quality_doubt"/> <span>품질을 직접 못 봐서 불안함</span></label>
+        <label class="qopt"><input type="radio" name="q3" value="price_hesitate"/> <span>가격이 비싼 것 같아서</span></label>
+        <label class="qopt"><input type="radio" name="q3" value="fit"/> <span>나한테 맞을지 모르겠어서</span></label>
+        <label class="qopt"><input type="radio" name="q3" value="brand_unknown"/> <span>브랜드가 낯설어서</span></label>
+        <label class="qopt q-other"><input type="radio" name="q3" value="other"/> <span>직접 입력:</span> <input class="q-other-input" id="q3other" placeholder="고민 요인을 직접 입력" onclick="document.querySelector('[name=q3][value=other]').checked=true"/></label>
+      </div>
+    </div>
+
+    <!-- Q4: 상세페이지 톤 -->
+    <div class="q-block" id="q4">
+      <div class="q-title">Q4. 이 제품의 상세페이지 전체 톤은?</div>
+      <div class="q-opts">
+        <label class="qopt"><input type="radio" name="q4" value="warm_daily"/> <span>따뜻하고 생활감 있는 일상 감성</span></label>
+        <label class="qopt"><input type="radio" name="q4" value="premium_trust"/> <span>신뢰감 있는 전문적/프리미엄 느낌</span></label>
+        <label class="qopt"><input type="radio" name="q4" value="trendy_young"/> <span>트렌디하고 감각적인 젊은 느낌</span></label>
+        <label class="qopt"><input type="radio" name="q4" value="clean_info"/> <span>깔끔하고 정보 중심의 실용적 느낌</span></label>
+        <label class="qopt q-other"><input type="radio" name="q4" value="other"/> <span>직접 입력:</span> <input class="q-other-input" id="q4other" placeholder="원하는 톤을 직접 입력" onclick="document.querySelector('[name=q4][value=other]').checked=true"/></label>
+      </div>
+    </div>
+
+    <!-- Q5: 핵심 소비자 -->
+    <div class="q-block" id="q5">
+      <div class="q-title">Q5. 이 제품을 가장 많이 구매하는 핵심 소비자는?</div>
+      <div class="q-opts">
+        <label class="qopt"><input type="radio" name="q5" value="housewife"/> <span>30~50대 주부/가정 중심</span></label>
+        <label class="qopt"><input type="radio" name="q5" value="office"/> <span>20~40대 직장인</span></label>
+        <label class="qopt"><input type="radio" name="q5" value="young"/> <span>10~20대 젊은 층</span></label>
+        <label class="qopt"><input type="radio" name="q5" value="health"/> <span>건강/웰니스에 관심 많은 분</span></label>
+        <label class="qopt q-other"><input type="radio" name="q5" value="other"/> <span>직접 입력:</span> <input class="q-other-input" id="q5other" placeholder="핵심 소비자를 직접 입력" onclick="document.querySelector('[name=q5][value=other]').checked=true"/></label>
+      </div>
+    </div>
+  </div>
   <div class="lsec">
     <div class="ltit">📸 제품 사진 업로드 (선택 · 최대 3장)</div>
     <div style="font-size:11px;color:var(--lm);margin-bottom:9px;line-height:1.6;">사진을 올리면 AI가 분석해서 이미지 프롬프트에 자동 반영하고,<br>미리보기에도 실제 사진이 표시됩니다.</div>
@@ -436,6 +512,41 @@ const CAT_FIELDS={
 let selColor='auto', selTheme='cozy', usageLeft=3;
 let photos=[]; // {dataUrl, analysis}
 
+/* ══ 4지선답 수집 ══ */
+const Q_LABELS = {
+  q1: {problem:'기존 제품 불만으로 인한 문제 해결형 구매', upgrade:'더 나은 제품으로의 업그레이드 구매', emotion:'감성/분위기 중심의 감성 소비', price:'가격 대비 품질의 가성비 소비'},
+  q2: {quality:'품질/소재/성분의 확실한 차별화', design:'디자인/패키징 차별화', price2:'동급 최저가 또는 최고 가성비', trust:'브랜드 신뢰도/인증/수상 이력'},
+  q3: {quality_doubt:'품질을 직접 못 봐서 불안 (상세 이미지와 소재 설명 강화 필요)', price_hesitate:'가격이 비싸 보임 (가성비 근거 제시 필요)', fit:'나한테 맞을지 불확실 (사용 시나리오 강화 필요)', brand_unknown:'브랜드 인지도 낮음 (신뢰 지표 강화 필요)'},
+  q4: {warm_daily:'따뜻하고 생활감 있는 일상 감성 톤', premium_trust:'신뢰감 있는 전문적/프리미엄 톤', trendy_young:'트렌디하고 감각적인 젊은 톤', clean_info:'깔끔하고 정보 중심의 실용적 톤'},
+  q5: {housewife:'30~50대 주부/가정 중심 소비자', office:'20~40대 직장인 소비자', young:'10~20대 젊은 소비자', health:'건강/웰니스 관심 소비자'},
+};
+
+function getQAnswers() {
+  const answers = {};
+  ['q1','q2','q3','q4','q5'].forEach(q => {
+    const checked = document.querySelector(`[name=${q}]:checked`);
+    if (!checked) return;
+    if (checked.value === 'other') {
+      const txt = document.getElementById(`${q}other`)?.value?.trim();
+      if (txt) answers[q] = txt;
+    } else {
+      answers[q] = Q_LABELS[q]?.[checked.value] || checked.value;
+    }
+  });
+  return answers;
+}
+
+function getQSummary() {
+  const a = getQAnswers();
+  const lines = [];
+  if (a.q1) lines.push(`- 구매 동기: ${a.q1}`);
+  if (a.q2) lines.push(`- 경쟁 우위: ${a.q2}`);
+  if (a.q3) lines.push(`- 구매 망설임 요인: ${a.q3}`);
+  if (a.q4) lines.push(`- 원하는 톤: ${a.q4}`);
+  if (a.q5) lines.push(`- 핵심 소비자: ${a.q5}`);
+  return lines.join('\n');
+}
+
 /* ══ CAT CHANGE ══ */
 function onCatChange(){
   const cat=document.getElementById('category').value;
@@ -548,6 +659,7 @@ async function generate(){
   const colorMap={auto:'카테고리/제품에 맞게 자동',warm:'웜 핑크 계열',nature:'내추럴 그린/옐로우',ocean:'블루/스카이',luxury:'블랙+골드',earth:'어스 브라운/베이지',purple:'라벤더/퍼플',fresh:'프레시 그린'};
   const themeMap={cozy:'편안한 일상',sensual:'감성 무드',info:'정보 중심',luxury:'프리미엄',minimal:'미니멀'};
   const photoAnalysis=getAnalysisSummary();
+  const qSummary=getQSummary();
 
   const loadEl=document.getElementById('loadingEl');
   const stepEl=document.getElementById('loadStep');
@@ -555,75 +667,84 @@ async function generate(){
   let si=0;const timer=setInterval(()=>{stepEl.textContent=STEPS[si++%STEPS.length];},1700);
   document.getElementById('genBtn').disabled=true;
 
-  const sys=`당신은 네이버 스마트스토어 상세페이지 전문 기획 AI입니다. 반드시 순수 JSON만 반환하세요. 절대 규칙:
+  const sys=`당신은 20년 이상 경력의 네이버 스마트스토어 상세페이지 전문 기획 컨설턴트이자 광고 사진 디렉터입니다.
+
+반드시 순수 JSON만 반환하세요. 절대 규칙:
 1) 마크다운 코드블록 금지
-2) 모든 JSON 문자열 값 안에 큰따옴표(") 절대 금지 → 반드시 작은따옴표(')로 대체
-3) 모든 JSON 문자열 값 안에 줄바꿈 절대 금지 → 한 문장으로 이어서 작성
-4) 모든 JSON 문자열 값 안에 백슬래시(\) 사용 금지
-5) report 각 필드는 반드시 하나의 긴 문자열로 작성 (줄바꿈 없이)
-6) imagePromptKo는 한국어 한 문장으로 작성
-7) 응답이 잘리지 않도록 간결하게 작성 (report 각 필드 200자 이내)`;
+2) JSON 문자열 값 안 큰따옴표 금지 → 작은따옴표로 대체
+3) JSON 문자열 값 안 줄바꿈 금지 → 한 줄로 작성
+4) 백슬래시 사용 금지
+5) 모든 report 필드는 반드시 한 줄로 작성 (200자 이내)
+6) imagePromptKo는 아래 카테고리별 가이드를 따라 극사실주의 광고사진 수준으로 작성
 
-  const usr=`당신은 네이버 스마트스토어 상세페이지 전문 기획 컨설턴트입니다. 아래 제품을 분석하고 실제 시장 경쟁 환경과 소비자 구매 심리를 반영한 완성도 높은 상세페이지를 기획해주세요.
+[카테고리별 극사실주의 사진 촬영 가이드]
+식품류(food_*,pet_food,kids_food): 음식 전문 푸드 포토그래퍼 스타일. 실제 음식의 질감/광택/수분감/신선도가 극명하게 보이도록. 수증기·물방울·기름기·결로 등 자연스러운 효과. 배경은 실제 소재(원목테이블/대리석/린넨천/크래프트지). 소품은 실제 주방용품. AI 합성 느낌 절대 금지. Hasselblad H6D-100c 또는 Phase One XF IQ4 150MP 활용.
+뷰티류(beauty_*): 뷰티 에디토리얼 화보 스타일. 제품 용기의 소재감(유리/메탈/플라스틱)이 사실적으로. 크림/세럼의 텍스처 클로즈업. 피부 표현 시 실제 피부결. Profoto B10 Plus + 뷰티디시. Sony A7R V + 90mm 매크로.
+패션류(fashion_*,acc_*): 패션 화보 스타일. 소재의 질감(드레이프/텍스처/광택) 사실적으로. 실제 착용샷은 자연스러운 인물 표현. Canon EOS R5 + 50mm f1.2L.
+가구/인테리어(furn_*): 인테리어 매거진 화보. 실제 공간에 배치된 모습. 자연광+보조조명. 앰비언트 라이팅.
+디지털/가전(digital_*): 제품 광고 스타일. 반사/광택 사실적으로. 소재 질감 극대화. 스튜디오 조명.
+공통: AI 생성 특유의 과도한 완벽함·부자연스러운 대칭·플라스틱 느낌 절대 금지. 실제 프로 사진작가가 촬영한 것처럼.`;
 
-[제품 정보]
-카테고리: ${cat} | 제품명: ${name} | 핵심특징: ${feat}
-타깃: ${tgt||'일반 소비자'} | 가격: ${prc||'미정'} | 추가강조: ${ext||'없음'}
-필수기재사항: ${reqLines||'없음'} | 색감: ${colorMap[selColor]} | 테마: ${themeMap[selTheme]}
-${photoAnalysis?`제품사진AI분석: ${photoAnalysis}`:''}
 
-[시장 분석 지침]
-이 카테고리(${cat})에서 네이버 스마트스토어에 일반적으로 많이 판매되는 동종 제품들의 공통 특징, 소비자들이 자주 언급하는 불만/니즈, 경쟁 제품 대비 차별화 포인트를 실제 시장 지식을 바탕으로 반영하세요. 2025년 네이버 쇼핑 트렌드(AiTEMS 알고리즘, 동영상 리뷰 가중치, 초기 고객 반응 중요성)도 반영하세요.
+  const usr=`[제품 분석 요청]
 
-아래 JSON으로만 응답 (마크다운 코드블록 금지, 큰따옴표 금지→작은따옴표로, 줄바꿈 금지, 한 줄 문자열):
+기본 정보: 카테고리(${cat}) | 제품명(${name}) | 특징(${feat}) | 타깃(${tgt||'일반 소비자'}) | 가격(${prc||'미정'}) | 강조(${ext||'없음'})
+필수기재사항: ${reqLines||'없음'}
+색감 방향: ${colorMap[selColor]} | 테마: ${themeMap[selTheme]}
+${qSummary?`\n[판매자 분석 입력]\n${qSummary}`:''}
+${photoAnalysis?`\n[제품 사진 AI 분석]\n${photoAnalysis}`:''}
 
+[전문가 기획 지침]
+1. 보고서 각 항목은 이 카테고리(${cat})의 실제 시장 상황, 네이버 쇼핑 트렌드, 동종 제품 소비자 패턴을 바탕으로 전문가 수준으로 작성하세요. 입력값이 적어도 시장 지식을 최대한 반영해 구체적으로 작성하세요.
+2. 섹션 순서는 이 제품의 특성에 따라 AI가 최적으로 결정하세요. 공감후킹→문제심화→해결책→특징→신뢰→CTA 가 기본이지만, 가성비 제품은 가격 강조를 앞에, 프리미엄 제품은 브랜드와 품질을 먼저, 식품류는 원산지와 신선도를 먼저 등 제품 특성에 맞게 재구성하세요.
+3. 이미지 프롬프트는 전문 사진 디렉터 수준으로 상세하게 작성하세요. 단, 어둡거나 부정적인 이미지는 절대 금지 - 문제 섹션도 '공감적이고 따뜻한 시선으로 불편함을 포착'하는 방식으로 연출하세요.
+4. 이미지 프롬프트는 아래 11가지 요소를 모두 포함해서 한 문장으로 작성하세요:
+   용도(이 이미지의 역할) + 구도(앵글/구성) + 조명(방향/종류/세기) + 배경(소재/색상/환경) + 스타일(광고/라이프스타일/플랫레이 등) + 질감(소재감/디테일) + 감정/분위기(따뜻함/신뢰/설레임 등) + 소품(함께 배치할 것들) + 카메라/렌즈(기종/mm/조리개) + 색감(톤/컬러 그레이딩) + 비율과 품질(4:5 or 1:1 or 9:16, 8K 등)
+
+아래 JSON으로만 응답:
 {"themeName":"${themeMap[selTheme]}","themeKey":"${selTheme}","colorScheme":"구체적 색상 설명","accentHex":"#XXXXXX","bgHex":"#XXXXXX","bgSecHex":"#XXXXXX","textHex":"#XXXXXX","textMutedHex":"#XXXXXX","surfaceHex":"#XXXXXX",
 
-"report":{"marketAnalysis":"이 카테고리 시장 상황과 경쟁 제품 특징 소비자 불만 패턴 분석 (150자 이내 작은따옴표만 사용 줄바꿈금지)","targetAnalysis":"타깃 소비자 구매 동기와 핵심 니즈 분석 (150자 이내 작은따옴표만 사용 줄바꿈금지)","competitiveEdge":"경쟁 제품 대비 차별점과 USP (100자 이내 작은따옴표만 사용 줄바꿈금지)","planningReason":"이 구성을 선택한 전략적 이유와 소비자 심리 흐름 (150자 이내 작은따옴표만 사용 줄바꿈금지)","seoKeywords":"네이버 핵심 검색 키워드 5~7개 쉼표구분","designStrategy":"색감과 레이아웃 전략 (100자 이내 줄바꿈금지)","contentStrategy":"언어 톤과 강조 포인트 (100자 이내 줄바꿈금지)","caution":"흔한 실수와 피해야 할 표현 (100자 이내 줄바꿈금지)"},
+"report":{
+"marketAnalysis":"${cat} 카테고리의 실제 네이버 쇼핑 시장 현황. 경쟁 밀도, 주요 경쟁 제품 패턴, 소비자 리뷰에서 반복되는 불만, 가격대별 포지셔닝, 2024-2025 트렌드 변화. 작은따옴표만 사용. 줄바꿈 금지. 200자 이내.",
+"targetAnalysis":"이 카테고리 핵심 구매층의 구체적 페르소나. 구매 전 검색 패턴, 상세페이지에서 가장 오래 보는 부분, 구매 결정 순간의 심리, 자주 비교하는 경쟁 제품, 이탈하는 이유. 작은따옴표만. 줄바꿈 금지. 200자 이내.",
+"competitiveEdge":"동종 제품들과의 실질적 차별점 분석. 이 제품이 가져갈 수 있는 포지셔닝, 강조해야 할 USP, 가격 정당화 방법, 리뷰에서 차별화 포인트. 작은따옴표만. 줄바꿈 금지. 200자 이내.",
+"planningReason":"이 제품에 최적화된 상세페이지 구성 전략. 왜 이 섹션 순서인지, 각 섹션이 소비자 심리의 어느 단계를 공략하는지, 스크롤 당 전환율을 높이는 이유. 작은따옴표만. 줄바꿈 금지. 200자 이내.",
+"seoKeywords":"네이버 쇼핑 검색 최적화 키워드 6~8개. 쉼표 구분. 조합 키워드 포함.",
+"designStrategy":"이 제품에 최적화된 디자인 전략. 색감 선택 심리적 근거, 폰트 방향, 이미지 여백 비율, 강조 요소 배치 원칙, 모바일 최적화 포인트. 작은따옴표만. 줄바꿈 금지. 200자 이내.",
+"contentStrategy":"카피라이팅 전략. 어떤 감정 버튼을 눌러야 하는지, 언어 톤과 존댓말 수준, 숫자와 수치의 활용법, 금지해야 할 표현, 구매 전환을 높이는 문구 패턴. 작은따옴표만. 줄바꿈 금지. 200자 이내.",
+"caution":"이 카테고리에서 흔히 저지르는 상세페이지 실수. 소비자 이탈을 부르는 구성, 과장 광고로 오해받는 표현, 경쟁사 대비 약점이 드러나는 부분, 피해야 할 이미지 스타일. 작은따옴표만. 줄바꿈 금지. 200자 이내."
+},
 
 "sections":[
-{"order":1,"name":"공감 후킹","purpose":"뒤로가기 방지","slides":[{
-  "headline":"소비자 감정을 직격하는 강렬한 제목 15자 이내 서술형 금지",
-  "subtext":"이 카테고리 소비자들이 실제로 겪는 구체적 불편함 묘사. 형식은 상황에 맞게 자유롭게(서술/불릿/감탄사 등). 공감 극대화. 80자 이상. 따옴표 줄바꿈 금지",
-  "layout":"full-image-overlay","tags":["감성태그1","감성태그2"],
-  "imagePromptKo":"[공감 후킹] 타깃 소비자가 느끼는 감성적 장면 연출. 카메라 각도(예:45도 사선), 조명(예:창문 자연광 왼쪽 45도), 배경 소재와 색상, 제품 또는 라이프스타일 배치, 색감 톤과 분위기 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
-
-{"order":2,"name":"문제 심화","purpose":"필요성 각인","slides":[{
-  "headline":"문제 본질 꿰뚫는 강렬한 제목 15자 이내",
-  "subtext":"이 문제를 방치하면 어떤 일이 생기는지, 동종 제품을 쓰면 어떤 실망을 하는지 구체적 서술. 형식 자유(서술형/비교형/질문형). 시장에서 흔히 보이는 소비자 불만 반영. 80자 이상. 따옴표 줄바꿈 금지",
-  "layout":"center-text","tags":["문제태그1","문제태그2"],
-  "imagePromptKo":"[문제 심화] 제품 없이 소비자 불편함 상황 연출. 어둡거나 무거운 색감 톤. 카메라 각도, 조명, 배경, 표정이나 상황, 분위기 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
-
-{"order":3,"name":"해결책 제시","purpose":"제품 연결","slides":[{
-  "headline":"제품이 해결책임 선언하는 강렬한 제목 15자 이내",
-  "subtext":"이 제품이 왜 답인지. 핵심 해결 메커니즘, 동종 제품과의 실질적 차이, 사용 후 변화를 구체적으로. 형식 자유(서술/대조표/전후비교). 시장 평균 대비 우위 포함. 80자 이상. 따옴표 줄바꿈 금지",
-  "layout":"split-right-image","tags":["해결태그1","해결태그2"],
-  "imagePromptKo":"[해결책 제시] 제품을 주인공으로 드라마틱하게 부각. 밝고 희망적 색감 톤. 가장 아름답게 보이는 조명과 각도, 배경, 광고 사진 스타일 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
-
-{"order":4,"name":"핵심 특징","purpose":"강점 강조","slides":[
-{"headline":"첫 번째 핵심 특징 강렬한 제목 15자 이내","subtext":"이 특징의 기술적 원리, 실제 체감 효과, 동종 제품과의 차이를 구체 수치나 사례로. 형식 자유. 80자 이상. 따옴표 줄바꿈 금지","layout":"split-left-text","tags":["특징태그"],"imagePromptKo":"[핵심 특징1] 제품 첫 번째 특징이나 소재 극단적 클로즈업. 매크로 효과로 질감과 디테일 강조. 조명, 피사계심도, 배경, 색감 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"},
-{"headline":"두 번째 핵심 특징 강렬한 제목 15자 이내","subtext":"두 번째 특징의 기능, 실생활 적용, 사용자 혜택을 감성적+논리적으로. 형식 자유. 80자 이상. 따옴표 줄바꿈 금지","layout":"split-right-image","tags":["특징태그"],"imagePromptKo":"[핵심 특징2] 실제 사용 라이프스타일 장면. 자연스러운 일상 환경. 카메라 각도, 조명, 배경, 따뜻한 색감 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
-
-{"order":5,"name":"신뢰/증거","purpose":"구매 확신","slides":[{
-  "headline":"신뢰 폭발시키는 수치 중심 제목 15자 이내",
-  "subtext":"이 카테고리에서 소비자가 신뢰할 수 있는 구체적 근거들. 인증, 수치, 사용자 검증, 품질 보증을 형식 자유롭게(표/리스트/서술). 필수기재사항 내용 자연스럽게 포함. 80자 이상. 따옴표 줄바꿈 금지",
-  "layout":"grid-3col","tags":["신뢰태그1","신뢰태그2"],
-  "imagePromptKo":"[신뢰 증거] 제품과 인증서 패키지 플랫레이. 오버헤드 앵글. 고급 배경, 균형 잡힌 배치, 신뢰감 있는 밝은 색감 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]},
-
-{"order":6,"name":"구매 유도 CTA","purpose":"전환 극대화","slides":[{
-  "headline":"지금 행동하게 만드는 강렬한 마감 제목 15자 이내",
-  "subtext":"구매를 지금 해야 하는 이유. 혜택, 망설임 해소, 행동 촉구. 이 카테고리에서 구매 결정을 막는 마지막 장벽 제거. 형식 자유. 80자 이상. 따옴표 줄바꿈 금지",
-  "layout":"full-image-overlay","tags":["구매태그1","구매태그2"],
-  "imagePromptKo":"[CTA] 제품 가장 완성도 높은 뷰티샷. 프리미엄 광고 스타일. 드라마틱한 조명, 고급 배경, 구매욕 자극하는 색감과 분위기 상세 서술. 120자 이상. 따옴표 줄바꿈 금지"}]}
+제품 특성과 판매자 입력을 분석하여 아래 6개 섹션을 최적 순서로 배치하세요. 각 섹션:
+{
+"order":순서번호,
+"name":"섹션명",
+"purpose":"이 섹션의 전략적 목적 (15자 이내)",
+"slides":[{
+"headline":"소비자 감정을 직격하는 강렬한 제목. 15자 이내. 서술형 금지. 동사나 감탄사 중심.",
+"subtext":"이 섹션에 가장 적합한 형식으로 자유롭게 작성. 서술형/공감형/비교형/질문형 등 내용에 맞게 선택. 구체적이고 생생하게. 100자 이내. 작은따옴표만. 줄바꿈 금지.",
+"layout":"full-image-overlay 또는 split-left-text 또는 split-right-image 또는 center-text 또는 grid-3col 중 택1",
+"tags":["관련키워드1","관련키워드2"],
+"imagePromptKo":"아래 형식을 반드시 모두 포함해서 한 문장으로 작성. 큰따옴표 줄바꿈 금지. 카테고리(${cat})와 섹션 특성에 맞게 작성. [촬영목적: 이 이미지가 상세페이지에서 하는 역할] [피사체: 제품명/식재료/인물 등 정확한 묘사] [촬영구도: 앵글(정면45도/오버헤드/로우앵글 등)+프레이밍(클로즈업/미디엄/와이드)] [카메라+렌즈: Sony A7R V 또는 Canon EOS R5 + 구체적mm렌즈 + 조리개 수치 예시 f2.8] [조명: 조명장비명(Profoto B10/Godox AD600)+위치(카메라좌측45도위)+각도+확산방식(소프트박스/뷰티디시/반사판)] [배경: 소재명(대리석/원목/린넨패브릭/크래프트지/세라믹)+색상+질감 구체적으로] [스타일링: 소품배치(어떤소품을 어디에)+색감조화+여백처리] [색감+보정: 컬러그레이딩 방향(웜한골든아워톤/쿨한클린화이트/리치한딥톤)+Lightroom 보정 방향] [분위기+감정: 보는 사람이 느껴야 할 감정과 구매욕구 자극 방식] [해상도+비율: 8K 또는 100MP + 4:5 또는 1:1 또는 9:16] [특별기법: 수증기/반사/물방울/결로/그림자 등 있으면 추가] -- 반드시 AI 생성 티가 전혀 나지 않는 실제 광고 화보 촬영 수준으로 작성. 추상적 표현 금지. 모든 요소 구체적 수치와 장비명으로."
+}]
+}
 ],
 
-"trustNumbers":[{"num":"구체적 숫자+단위","label":"설명"},{"num":"구체적 숫자","label":"설명"},{"num":"구체적 숫자+단위","label":"설명"}],
-"reviews":[{"stars":5,"text":"사용 전후 변화 중심 자연스러운 후기. 이 카테고리 소비자가 실제 쓸 법한 표현으로. 따옴표 없이 한 문장","author":"닉네임"},{"stars":5,"text":"다른 관점 자연스러운 후기. 따옴표 없이","author":"닉네임"},{"stars":4,"text":"솔직한 후기. 따옴표 없이","author":"닉네임"}],
-"specTable":[{"key":"항목","val":"내용"}],
-"heroHeadline":"전체를 관통하는 강렬한 메인 헤드라인 20자 이내",
-"heroSub":"보완하는 서브 카피 30자 이내"}
+사용할 섹션 유형 (제품에 맞게 선택하고 순서 조정):
+- 공감 후킹: 첫인상, 뒤로가기 방지
+- 문제 심화: 필요성 각인 (단 어둡지 않게, 공감적으로)
+- 해결책 제시: 제품 연결
+- 핵심 특징: 구체적 강점 (2개 슬라이드)
+- 신뢰/증거: 구매 확신
+- 구매 유도 CTA: 전환 극대화
 
-중요 규칙: subtext는 1.2.3. 고정 형식 금지 - 내용에 따라 서술형/비교형/감탄형/질문형/리스트 등 가장 적합한 형식 자유롭게 선택. report 각 필드는 반드시 지정 글자수 이상 구체적으로. 시장 지식을 최대한 반영해 실제로 도움이 되는 내용으로.`;
+"trustNumbers":[{"num":"구체적숫자+단위","label":"설명"},{"num":"구체적숫자","label":"설명"},{"num":"구체적숫자+단위","label":"설명"}],
+"reviews":[{"stars":5,"text":"사용 전후 변화 중심 자연스러운 후기. 이 카테고리 실제 소비자 언어 패턴 반영. 작은따옴표만. 줄바꿈 금지.","author":"닉네임"},{"stars":5,"text":"다른 관점 후기. 작은따옴표만.","author":"닉네임"},{"stars":4,"text":"솔직한 후기. 작은따옴표만.","author":"닉네임"}],
+"specTable":[{"key":"항목","val":"내용"}],
+"heroHeadline":"전체를 관통하는 강렬한 메인 헤드라인. 20자 이내. 이 제품만의 본질을 한 줄로.",
+"heroSub":"서브 카피. 30자 이내. 헤드라인을 구체화."
+}`;
 
 
   try{
@@ -860,16 +981,9 @@ function renderResult(r,name,feat,prc){
         ${subtextHtml}
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">${(sl.tags||[]).map(t=>`<span class="stag">${t}</span>`).join('')}</div>
         <div class="pbox pbox-prompt">
-          <div class="pbox-label">📸 이미지 프롬프트 (수정 가능)</div>
-          <textarea class="pbox-textarea" id="ko_${pid}" rows="3">${koPrompt}</textarea>
-          <div style="display:flex;gap:6px;align-items:center;margin-top:5px;">
-            <button class="pbox-btn pbox-prompt-btn" onclick="translateToKo(document.getElementById('ko_${pid}').value,'eng_${pid}',this)">🔄 영문 변환</button>
-            <button class="copy-btn" onclick="copyEl('eng_${pid}',this)">📋 영문 복사</button>
-          </div>
-          <div style="margin-top:8px;background:#1e1b4b;border-radius:7px;padding:9px 11px;">
-            <div style="font-size:9px;color:#a5b4fc;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">🇺🇸 English Prompt</div>
-            <div id="eng_${pid}" style="font-size:10.5px;color:#c7d2fe;font-family:'Courier New',monospace;line-height:1.65;">${sl.imagePrompt||'한글 프롬프트를 영문 변환하면 여기에 표시됩니다.'}</div>
-          </div>
+          <div class="pbox-label">📸 이미지 프롬프트 <span style="font-weight:400;opacity:.7;">(수정 후 복사해서 ChatGPT/Midjourney에 붙여넣기)</span></div>
+          <textarea class="pbox-textarea" id="ko_${pid}" rows="5" style="font-size:12px;line-height:1.8;">${koPrompt}</textarea>
+          <button class="copy-btn" style="margin-top:6px;" onclick="copyEl('ko_${pid}',this)">📋 프롬프트 복사</button>
         </div>
       </div>`;
     }).join('<hr style="border:none;border-top:1px solid #f0f4ff;margin:0 18px;">');
@@ -984,6 +1098,7 @@ const STEP_DEFS=[
   {title:'제품 기본 정보',hint:'제품명과 핵심 특징을 입력해주세요',type:'basic'},
   {title:'타깃 & 가격',hint:'누구에게 얼마에 파나요?',type:'target'},
   {title:'필수 기재사항',hint:'카테고리별 필수 정보를 입력해주세요',type:'req'},
+  {title:'제품 특성 분석',hint:'해당하는 항목을 선택하면 더 정확한 기획이 나와요',type:'quiz'},
   {title:'제품 사진 업로드',hint:'사진을 올리면 AI가 분석해서 프롬프트에 반영해요',type:'photo'},
   {title:'색감 & 테마',hint:'상세페이지 분위기를 선택하세요',type:'theme'},
   {title:'기획 생성',hint:'모든 준비 완료! 지금 바로 생성해드릴게요',type:'gen'},
@@ -1037,6 +1152,31 @@ function renderMobStep(){
             :`<input id="mreq_${f.id}" type="text" placeholder="${f.ph}" value="${mD.req?.[f.id]||''}"/>`}
         </div>`).join('');
     }
+
+  }else if(s.type==='quiz'){
+    const qs=[
+      {q:'q1',title:'고객이 이 제품을 구매하는 주요 이유는?',opts:[['problem','기존 제품 불만 (문제 해결형)'],['upgrade','더 좋은 걸 원해서 (업그레이드)'],['emotion','감성/분위기가 좋아서'],['price','가격 대비 품질 (가성비)']]},
+      {q:'q2',title:'경쟁 제품 대비 가장 큰 강점은?',opts:[['quality','품질/소재/성분 차별화'],['design','디자인/패키징 차별화'],['price2','동급 최저가/최고 가성비'],['trust','브랜드 신뢰도/인증/수상']]},
+      {q:'q3',title:'고객이 구매 전 가장 망설이는 이유는?',opts:[['quality_doubt','품질을 못 봐서 불안'],['price_hesitate','가격이 비싸 보여서'],['fit','나한테 맞을지 몰라서'],['brand_unknown','브랜드가 낯설어서']]},
+      {q:'q4',title:'상세페이지 전체 톤은?',opts:[['warm_daily','따뜻한 일상 감성'],['premium_trust','신뢰감 있는 프리미엄'],['trendy_young','트렌디하고 감각적'],['clean_info','깔끔하고 실용적']]},
+      {q:'q5',title:'핵심 소비자는?',opts:[['housewife','30~50대 주부/가정'],['office','20~40대 직장인'],['young','10~20대 젊은 층'],['health','건강/웰니스 관심층']]},
+    ];
+    body.innerHTML=qs.map(({q,title,opts})=>`
+      <div class="mob-card">
+        <div class="mob-lbl">${title}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          ${opts.map(([val,label])=>`
+            <label style="display:flex;align-items:center;gap:8px;background:#f8f9ff;border:1.5px solid #dce3f0;border-radius:9px;padding:9px 12px;cursor:pointer;font-size:13px;color:#1c2240;">
+              <input type="radio" name="m_${q}" value="${val}" style="accent-color:#4f46e5;width:15px;height:15px;"/> ${label}
+            </label>`).join('')}
+          <label style="display:flex;align-items:center;gap:8px;background:#f8f9ff;border:1.5px solid #dce3f0;border-radius:9px;padding:9px 12px;font-size:13px;color:#1c2240;">
+            <input type="radio" name="m_${q}" value="other" style="accent-color:#4f46e5;width:15px;height:15px;"/> 직접 입력:
+            <input id="m_${q}other" placeholder="직접 입력" style="flex:1;background:transparent;border:none;border-bottom:1px solid #dce3f0;outline:none;font-size:12px;font-family:'Noto Sans KR';padding:2px 4px;" onclick="document.querySelector('[name=m_${q}][value=other]').checked=true"/>
+          </label>
+        </div>
+      </div>`).join('');
+    // 저장된 값 복원
+    if(mD.quiz){Object.entries(mD.quiz).forEach(([q,v])=>{const el=document.querySelector(`[name=m_${q}][value="${v}"]`);if(el)el.checked=true;});}
 
   }else if(s.type==='photo'){
     body.innerHTML=`
@@ -1107,6 +1247,15 @@ function saveMobStep(){
   else if(s.type==='basic'){mD.name=document.getElementById('m_name')?.value||'';mD.feat=document.getElementById('m_feat')?.value||'';mD.extra=document.getElementById('m_extra')?.value||'';}
   else if(s.type==='target'){mD.tgt=document.getElementById('m_tgt')?.value||'';mD.prc=document.getElementById('m_prc')?.value||'';}
   else if(s.type==='req'){mD.req={};(CAT_FIELDS[mD.cat]||[]).forEach(f=>{const el=document.getElementById('mreq_'+f.id);if(el)mD.req[f.id]=el.value;});}
+  else if(s.type==='quiz'){
+    mD.quiz={};
+    ['q1','q2','q3','q4','q5'].forEach(q=>{
+      const checked=document.querySelector(`[name=m_${q}]:checked`);
+      if(!checked)return;
+      if(checked.value==='other'){const t=document.getElementById(`m_${q}other`)?.value?.trim();if(t)mD.quiz[q]=t;}
+      else mD.quiz[q]=checked.value;
+    });
+  }
   if(!mD.color)mD.color='auto';
   if(!mD.theme)mD.theme='cozy';
 }
@@ -1160,6 +1309,19 @@ async function mGenerate(){
   onCatChange();
   await new Promise(r=>setTimeout(r,100));
   if(mD.req)(CAT_FIELDS[mD.cat]||[]).forEach(f=>{const el=document.getElementById('req_'+f.id);if(el&&mD.req[f.id])el.value=mD.req[f.id];});
+
+  // 4지선답 동기화
+  if(mD.quiz){
+    ['q1','q2','q3','q4','q5'].forEach(q=>{
+      const v=mD.quiz[q];if(!v)return;
+      const el=document.querySelector(`[name=${q}][value="${v}"]`);
+      if(el)el.checked=true;
+      else{
+        const other=document.querySelector(`[name=${q}][value="other"]`);
+        if(other){other.checked=true;const inp=document.getElementById(`${q}other`);if(inp)inp.value=v;}
+      }
+    });
+  }
 
   // 로딩 UI를 모바일에 표시
   const mobWrap=document.getElementById('mobWrap');
