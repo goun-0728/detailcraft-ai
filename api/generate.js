@@ -1,55 +1,78 @@
-// Edge 대신 Node.js 런타임 사용 (타임아웃 60초, Edge는 30초 제한)
-export const config = { runtime: 'nodejs', maxDuration: 60 };
+export const config = { runtime: 'edge' };
 
-export default async function handler(req, res) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export default async function handler(req) {
+  const cors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
 
-  if (req.method === 'OPTIONS') { res.status(204).end(); return; }
-  if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
   try {
-    const body = req.body;
-    const apiKey = process.env.OPENAI_API_KEY;
+    const body = await req.json();
+    const { type } = body;
 
-    if (!apiKey) { res.status(500).json({ error: 'API key not configured' }); return; }
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: body.model || 'gpt-4o',
-        max_tokens: body.max_tokens || 6000,
-        messages: [
-          { role: 'system', content: body.system || '' },
-          ...(body.messages || [])
-        ],
-      }),
+    const json = (data, status=200) => new Response(JSON.stringify(data), {
+      status, headers: { ...cors, 'Content-Type': 'application/json' }
     });
 
-    const data = await response.json();
+    // ── Claude (기획/번역/분석) ──
+    if (!type || type === 'plan' || type === 'translate' || type === 'analyze') {
+      const key = process.env.ANTHROPIC_API_KEY;
+      if (!key) return json({ error: 'ANTHROPIC_API_KEY not set in Vercel environment variables' }, 500);
 
-    if (!response.ok) {
-      res.status(response.status).json({ error: data.error?.message || 'API error' });
-      return;
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: body.model || 'claude-sonnet-4-20250514',
+          max_tokens: body.max_tokens || 6000,
+          system: body.system || '',
+          messages: body.messages || [],
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) return json({ error: data.error?.message || `Claude error ${res.status}` }, res.status);
+      return json(data);
     }
 
-    // OpenAI 응답을 기존 형식으로 변환
-    const converted = {
-      content: [{
-        type: 'text',
-        text: data.choices?.[0]?.message?.content || ''
-      }]
-    };
+    // ── DALL-E 3 (이미지 생성) ──
+    if (type === 'image') {
+      const key = process.env.OPENAI_API_KEY;
+      if (!key) return json({ error: 'OPENAI_API_KEY not set in Vercel environment variables' }, 500);
 
-    res.status(200).json(converted);
+      const res = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt: body.prompt,
+          n: 1,
+          size: body.size || '1024x1024',
+          quality: 'hd',
+          style: 'natural',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) return json({ error: data.error?.message || `DALL-E error ${res.status}` }, res.status);
+      return json({ url: data.data?.[0]?.url || null });
+    }
+
+    return json({ error: 'Unknown type' }, 400);
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   }
 }
