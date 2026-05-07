@@ -456,7 +456,7 @@ function removePhoto(idx){photos.splice(idx,1);document.getElementById('photoGri
 async function analyzePhoto(idx,dataUrl){
   try{
     const b64=dataUrl.split(',')[1];const mime=dataUrl.split(';')[0].split(':')[1];
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'analyze',
       model:'claude-sonnet-4-20250514',max_tokens:200,
       system:'제품 사진 분석 전문가. 색상, 소재, 형태, 패키징, 분위기를 2~3문장 한국어로. 이미지 생성 프롬프트에 활용.',
       messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:b64}},{type:'text',text:'이 제품 사진을 분석해주세요.'}]}]
@@ -556,10 +556,10 @@ async function generate(){
 중요: sections는 제품 특성에 맞게 순서와 내용을 자유롭게 조정하세요. 문제심화 섹션은 넣지 마세요. 자연스러운 스토리 흐름으로. imagePromptKo는 극사실주의 광고사진 수준으로 모든 기술적 요소 포함.`;
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/generate',{
       method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:6000,system:sys,messages:[{role:'user',content:usr}]})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'plan',model:'claude-sonnet-4-20250514',max_tokens:6000,system:sys,messages:[{role:'user',content:usr}]})
     });
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
     const data=await res.json();
@@ -779,7 +779,7 @@ async function generateSectionImages(r,name){
   try{ await loadHtml2Canvas(); }catch(e){ console.warn('html2canvas 로드 실패'); }
 
   // 1단계: DALL-E 이미지 생성 (업로드 사진 없는 섹션만)
-  const apiKey = window.OPENAI_KEY||'';
+  // API 키는 서버 환경변수에서 처리
 
   for(let i=0;i<sections.length;i++){
     const sec=sections[i];
@@ -817,10 +817,11 @@ async function generateSectionImages(r,name){
 
 async function generateDalleImage(sec,r,name,idx){
   // DALL-E 3 프롬프트 구성 (영어로 변환)
-  const translateRes=await fetch('https://api.anthropic.com/v1/messages',{
+  const translateRes=await fetch('/api/generate',{
     method:'POST',
-    headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
+      type:'translate',
       model:'claude-sonnet-4-20250514',max_tokens:400,
       system:'You are a professional photography prompt translator. Translate Korean photography prompts to English for DALL-E 3. Output ONLY the English prompt, no explanations. Make it extremely photorealistic, professional advertising photography style. No text in image. No AI-looking unrealistic elements.',
       messages:[{role:'user',content:`Translate this to English DALL-E 3 prompt:\n${sec.imagePromptKo||''}\n\nProduct: ${name}\nSection: ${sec.name}`}]
@@ -831,27 +832,18 @@ async function generateDalleImage(sec,r,name,idx){
   console.log(`섹션${idx} 영문 프롬프트:`, engPrompt.slice(0,100));
 
   // OpenAI DALL-E 3 호출
-  const apiKey=document.getElementById('openaiKey')?.value||window.OPENAI_KEY||'';
-  if(!apiKey){
-    console.warn('OpenAI API 키 없음, Canvas 렌더링만 수행');
-    return null;
-  }
-
-  const dalleRes=await fetch('https://api.openai.com/v1/images/generations',{
+  const dalleRes=await fetch('/api/generate',{
     method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'dall-e-3',
+      type:'image',
       prompt:engPrompt+' Professional product photography, photorealistic, no text, no watermark, commercial advertising quality',
-      n:1,
-      size:'1024x1024',
-      quality:'hd',
-      style:'natural'
+      size:'1024x1024'
     })
   });
   const dData=await dalleRes.json();
-  if(dData.error)throw new Error(dData.error.message);
-  return dData.data?.[0]?.url||null;
+  if(dData.error)throw new Error(dData.error);
+  return dData.url||null;
 }
 
 /* ══ 이미지 배분 로직 ══ */
@@ -1289,36 +1281,6 @@ window.addEventListener('load',()=>{if(isMob())initMob();});
 window.addEventListener('resize',()=>{if(isMob()&&document.getElementById('mobBody')&&!document.getElementById('mobBody').innerHTML)initMob();});
 </script>
 
-<!-- OpenAI API 키 입력 (숨김 처리 - Vercel 환경변수로 대체 가능) -->
-<div id="apiKeyModal" style="display:flex;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:3000;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;padding:28px;max-width:420px;width:90%;text-align:center;">
-    <div style="font-size:28px;margin-bottom:12px;">🔑</div>
-    <div style="font-size:16px;font-weight:800;color:#1c2240;margin-bottom:6px;">이미지 생성 설정</div>
-    <div style="font-size:12px;color:#7880a0;margin-bottom:18px;line-height:1.7;">섹션 이미지를 생성하려면 OpenAI API 키가 필요해요.<br>키가 없으면 기획 보고서만 생성됩니다.</div>
-    <input id="openaiKey" type="password" placeholder="sk-proj-... (OpenAI API 키)" style="width:100%;border:1.5px solid #dce3f0;border-radius:9px;padding:11px 13px;font-size:13px;font-family:'Noto Sans KR';outline:none;margin-bottom:12px;"/>
-    <div style="display:flex;gap:10px;">
-      <button onclick="skipApiKey()" style="flex:1;background:#f0f4ff;border:1px solid #dce3f5;border-radius:9px;padding:11px;color:#4f46e5;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR';">기획만 (이미지 없이)</button>
-      <button onclick="saveApiKey()" style="flex:1;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:9px;padding:11px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR';">저장하고 시작</button>
-    </div>
-    <div style="font-size:11px;color:#7880a0;margin-top:10px;">API 키는 브라우저에만 저장되며 서버로 전송되지 않아요.</div>
-  </div>
-</div>
 
-<script>
-function saveApiKey(){
-  const key=document.getElementById('openaiKey').value.trim();
-  if(key)window.OPENAI_KEY=key;
-  document.getElementById('apiKeyModal').style.display='none';
-}
-function skipApiKey(){
-  window.OPENAI_KEY='';
-  document.getElementById('apiKeyModal').style.display='none';
-}
-// 저장된 키 불러오기
-window.addEventListener('load',()=>{
-  const saved=sessionStorage.getItem('openaiKey');
-  if(saved){window.OPENAI_KEY=saved;document.getElementById('apiKeyModal').style.display='none';}
-});
-</script>
 </body>
 </html>
